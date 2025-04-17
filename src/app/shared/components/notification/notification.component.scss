@@ -1,0 +1,138 @@
+// shared/components/notification/notification.component.scss
+.notifications-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 350px;
+  z-index: 9999;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  padding-right: 5px;
+
+  /* Customize scrollbar */
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 2px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 2px;
+  }
+}
+
+.notification-item {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 10px;
+  padding: 15px;
+  background-color: white;
+  border-radius: 6px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+  animation: slide-in 0.3s ease-out;
+  max-width: 100%;
+
+  &.success {
+    border-left: 4px solid #4caf50;
+
+    .notification-icon {
+      color: #4caf50;
+    }
+  }
+
+  &.error {
+    border-left: 4px solid #f44336;
+
+    .notification-icon {
+      color: #f44336;
+    }
+  }
+
+  &.warning {
+    border-left: 4px solid #ff9800;
+
+    .notification-icon {
+      color: #ff9800;
+    }
+  }
+
+  &.info {
+    border-left: 4px solid #2196f3;
+
+    .notification-icon {
+      color: #2196f3;
+    }
+  }
+
+  .notification-icon {
+    padding-top: 2px;
+    margin-right: 15px;
+
+    i {
+      font-size: 18px;
+    }
+  }
+
+  .notification-content {
+    flex: 1;
+
+    .notification-message {
+      color: #333;
+      margin-bottom: 8px;
+      word-break: break-word;
+    }
+
+    .action-button {
+      background: none;
+      border: none;
+      color: #3f51b5;
+      padding: 0;
+      font-weight: 500;
+      cursor: pointer;
+      font-size: 13px;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  .close-button {
+    background: none;
+    border: none;
+    color: #999;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    margin-left: 10px;
+    border-radius: 50%;
+
+    &:hover {
+      background-color: #f1f1f1;
+      color: #333;
+    }
+
+    i {
+      font-size: 14px;
+    }
+  }
+}
+
+@keyframes slide-in {
+  0% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}

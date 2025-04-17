@@ -1,0 +1,103 @@
+<div class="dashboard">
+  <h1 class="dashboard-title">Dashboard</h1>
+
+  <div class="dashboard-stats">
+    <!-- Statistiques -->
+    <div class="stat-card">
+      <h2 class="stat-title">Enquêtes actives</h2>
+      <p class="stat-value primary">{{ activesSurveys }}</p>
+    </div>
+
+    <div class="stat-card">
+      <h2 class="stat-title">Réponses ce mois</h2>
+      <p class="stat-value secondary">{{ monthlyResponses }}</p>
+    </div>
+
+    <div class="stat-card">
+      <h2 class="stat-title">Taux de complétion</h2>
+      <p class="stat-value success">{{ completionRate }}%</p>
+    </div>
+
+    <div class="stat-card">
+      <h2 class="stat-title">Invitations envoyées</h2>
+      <p class="stat-value accent">{{ sentInvitations }}</p>
+    </div>
+  </div>
+
+  <div class="dashboard-activity">
+    <h2 class="section-title">Activité récente</h2>
+    <div class="activity-log">
+      <div class="activity-item" *ngFor="let activity of recentActivities">
+        <div class="activity-content">
+          <p class="activity-text">{{ activity.description }}</p>
+        </div>
+        <div class="activity-time">
+          <p>{{ activity.time }}</p>
+        </div>
+      </div>
+
+      <div class="no-activity" *ngIf="recentActivities.length === 0">
+        <p>Aucune activité récente à afficher</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="dashboard-surveys">
+    <div class="section-header">
+      <h2 class="section-title">Mes enquêtes</h2>
+      <button class="btn btn-primary" [routerLink]="['/surveys/create']">
+        <i class="material-icons">add</i> Nouvelle enquête
+      </button>
+    </div>
+
+    <div class="surveys-list">
+      <div class="survey-item" *ngFor="let survey of recentSurveys">
+        <div class="survey-info">
+          <h3 class="survey-title">{{ survey.title }}</h3>
+          <p class="survey-date">
+            Créé le {{ survey.creationDate | date : "dd/MM/yyyy" }}
+          </p>
+        </div>
+        <div class="survey-stats">
+          <span class="survey-stat">
+            <i class="material-icons">question_answer</i>
+            {{ survey.responseCount }}
+          </span>
+          <span class="survey-stat">
+            <i class="material-icons">people</i> {{ survey.participantsCount }}
+          </span>
+        </div>
+        <div
+          class="survey-status"
+          [ngClass]="getSurveyStatusClass(survey.status)"
+        >
+          {{ getSurveyStatusLabel(survey.status) }}
+        </div>
+        <div class="survey-actions">
+          <button class="btn btn-icon" [routerLink]="['/surveys', survey.id]">
+            <i class="material-icons">visibility</i>
+          </button>
+          <button
+            class="btn btn-icon"
+            [routerLink]="['/surveys', survey.id, 'edit']"
+          >
+            <i class="material-icons">edit</i>
+          </button>
+          <button
+            class="btn btn-icon"
+            [routerLink]="['/analytics/survey', survey.id]"
+          >
+            <i class="material-icons">bar_chart</i>
+          </button>
+        </div>
+      </div>
+
+      <div class="no-surveys" *ngIf="recentSurveys.length === 0">
+        <p>Aucune enquête à afficher</p>
+        <button class="btn btn-primary" [routerLink]="['/surveys/create']">
+          Créer votre première enquête
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

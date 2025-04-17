@@ -1,0 +1,30 @@
+<!-- shared/components/notification/notification.component.html -->
+<div class="notifications-container">
+  <div
+    class="notification-item"
+    *ngFor="let notification of notifications"
+    [ngClass]="{
+      success: notification.type === NotificationType.SUCCESS,
+      error: notification.type === NotificationType.ERROR,
+      warning: notification.type === NotificationType.WARNING,
+      info: notification.type === NotificationType.INFO
+    }"
+  >
+    <div class="notification-icon">
+      <i class="fa" [ngClass]="getIcon(notification.type)"></i>
+    </div>
+    <div class="notification-content">
+      <div class="notification-message">{{ notification.message }}</div>
+      <button
+        class="action-button"
+        *ngIf="notification.action"
+        (click)="executeAction(notification)"
+      >
+        {{ notification.action.text }}
+      </button>
+    </div>
+    <button class="close-button" (click)="closeNotification(notification.id)">
+      <i class="fa fa-times"></i>
+    </button>
+  </div>
+</div>

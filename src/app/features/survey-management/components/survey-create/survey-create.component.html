@@ -1,0 +1,400 @@
+<div class="survey-create">
+  <h1 class="page-title">Création d'une nouvelle enquête</h1>
+
+  <!-- Barre d'étapes -->
+  <div class="steps-container">
+    <div class="steps-bar">
+      <div
+        class="step"
+        [ngClass]="{ active: currentStep >= 1, completed: currentStep > 1 }"
+      >
+        <div class="step-number">1</div>
+        <div class="step-label">Infos</div>
+      </div>
+
+      <div class="step-line" [ngClass]="{ active: currentStep > 1 }"></div>
+
+      <div
+        class="step"
+        [ngClass]="{ active: currentStep >= 2, completed: currentStep > 2 }"
+      >
+        <div class="step-number">2</div>
+        <div class="step-label">Questions</div>
+      </div>
+
+      <div class="step-line" [ngClass]="{ active: currentStep > 2 }"></div>
+
+      <div
+        class="step"
+        [ngClass]="{ active: currentStep >= 3, completed: currentStep > 3 }"
+      >
+        <div class="step-number">3</div>
+        <div class="step-label">Paramètres</div>
+      </div>
+
+      <div class="step-line" [ngClass]="{ active: currentStep > 3 }"></div>
+
+      <div
+        class="step"
+        [ngClass]="{ active: currentStep >= 4, completed: currentStep > 4 }"
+      >
+        <div class="step-number">4</div>
+        <div class="step-label">Aperçu</div>
+      </div>
+
+      <div class="step-line" [ngClass]="{ active: currentStep > 4 }"></div>
+
+      <div class="step" [ngClass]="{ active: currentStep >= 5 }">
+        <div class="step-number">5</div>
+        <div class="step-label">Diffusion</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Formulaire principal -->
+  <div class="form-container" [ngSwitch]="currentStep">
+    <!-- Étape 1: Informations de base -->
+    <div class="form-step" *ngSwitchCase="1">
+      <h2 class="form-section-title">Informations de base</h2>
+
+      <form [formGroup]="surveyInfoForm">
+        <div class="form-group">
+          <label for="title">Titre de l'enquête *</label>
+          <input
+            type="text"
+            id="title"
+            formControlName="title"
+            class="form-control"
+            placeholder="Donnez un titre à votre enquête"
+          />
+          <div
+            class="error-message"
+            *ngIf="
+              surveyInfoForm.get('title')?.invalid &&
+              surveyInfoForm.get('title')?.touched
+            "
+          >
+            Le titre est obligatoire
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="description">Description</label>
+          <textarea
+            id="description"
+            formControlName="description"
+            class="form-control"
+            placeholder="Décrivez l'objectif de votre enquête"
+          ></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="type">Type d'enquête</label>
+          <select id="type" formControlName="type" class="form-control">
+            <option value="survey">Sondage standard</option>
+            <option value="poll">Vote rapide</option>
+            <option value="quiz">Quiz</option>
+          </select>
+        </div>
+      </form>
+    </div>
+
+    <!-- Étape 2: Questions -->
+    <div class="form-step" *ngSwitchCase="2">
+      <div class="section-header">
+        <h2 class="form-section-title">Questions</h2>
+        <button class="btn btn-primary" (click)="addQuestion()">
+          <i class="material-icons">add</i> Ajouter une question
+        </button>
+      </div>
+
+      <div class="questions-list" *ngIf="questions.length > 0">
+        <div
+          class="question-item"
+          *ngFor="let question of questions; let i = index"
+        >
+          <div class="question-header">
+            <h3 class="question-title">{{ i + 1 }}. {{ question.title }}</h3>
+            <div class="question-actions">
+              <button class="btn btn-icon" (click)="editQuestion(question)">
+                <i class="material-icons">edit</i>
+              </button>
+              <button class="btn btn-icon" (click)="deleteQuestion(question)">
+                <i class="material-icons">delete</i>
+              </button>
+            </div>
+          </div>
+          <div class="question-type-badge" [ngClass]="'type-' + question.type">
+            {{ getQuestionTypeLabel(question.type) }}
+          </div>
+          <p class="question-description" *ngIf="question.description">
+            {{ question.description }}
+          </p>
+        </div>
+      </div>
+
+      <div class="empty-questions" *ngIf="questions.length === 0">
+        <p>Aucune question ajoutée</p>
+        <button class="btn btn-primary" (click)="addQuestion()">
+          Ajouter votre première question
+        </button>
+      </div>
+    </div>
+
+    <!-- Étape 3: Paramètres -->
+    <div class="form-step" *ngSwitchCase="3">
+      <h2 class="form-section-title">Paramètres</h2>
+
+      <form [formGroup]="surveySettingsForm">
+        <div class="form-group checkbox">
+          <input
+            type="checkbox"
+            id="allowAnonymous"
+            formControlName="allowAnonymous"
+          />
+          <label for="allowAnonymous">Autoriser les réponses anonymes</label>
+        </div>
+
+        <div class="form-group checkbox">
+          <input
+            type="checkbox"
+            id="showProgressBar"
+            formControlName="showProgressBar"
+          />
+          <label for="showProgressBar">Afficher la barre de progression</label>
+        </div>
+
+        <div class="form-group checkbox">
+          <input
+            type="checkbox"
+            id="allowIncomplete"
+            formControlName="allowIncomplete"
+          />
+          <label for="allowIncomplete"
+            >Autoriser les réponses incomplètes</label
+          >
+        </div>
+
+        <div class="form-group checkbox">
+          <input
+            type="checkbox"
+            id="shuffleQuestions"
+            formControlName="shuffleQuestions"
+          />
+          <label for="shuffleQuestions"
+            >Afficher les questions dans un ordre aléatoire</label
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="responseLimit">Limite de réponses (optionnel)</label>
+          <input
+            type="number"
+            id="responseLimit"
+            formControlName="responseLimit"
+            class="form-control"
+          />
+        </div>
+
+        <div class="form-group checkbox">
+          <input
+            type="checkbox"
+            id="notifyOnResponse"
+            formControlName="notifyOnResponse"
+          />
+          <label for="notifyOnResponse"
+            >Être notifié à chaque nouvelle réponse</label
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="thankYouMessage">Message de remerciement</label>
+          <textarea
+            id="thankYouMessage"
+            formControlName="thankYouMessage"
+            class="form-control"
+            placeholder="Message affiché après la soumission de l'enquête"
+          ></textarea>
+        </div>
+      </form>
+    </div>
+
+    <!-- Étape 4: Aperçu -->
+    <div class="form-step" *ngSwitchCase="4">
+      <h2 class="form-section-title">Aperçu de l'enquête</h2>
+
+      <div class="preview-container">
+        <div class="preview-header">
+          <h3 class="preview-title">
+            {{ surveyInfoForm.get("title")?.value }}
+          </h3>
+          <p
+            class="preview-description"
+            *ngIf="surveyInfoForm.get('description')?.value"
+          >
+            {{ surveyInfoForm.get("description")?.value }}
+          </p>
+        </div>
+
+        <div class="preview-questions">
+          <div
+            class="preview-question"
+            *ngFor="let question of questions; let i = index"
+          >
+            <h4 class="preview-question-title">
+              {{ i + 1 }}. {{ question.title }}
+            </h4>
+            <p
+              class="preview-question-description"
+              *ngIf="question.description"
+            >
+              {{ question.description }}
+            </p>
+
+            <!-- Aperçu différent selon le type de question -->
+            <div class="preview-question-answer" [ngSwitch]="question.type">
+              <div *ngSwitchCase="'text_short'" class="preview-text-input">
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="Réponse courte"
+                  disabled
+                />
+              </div>
+
+              <div *ngSwitchCase="'text_long'" class="preview-text-input">
+                <textarea
+                  class="form-control"
+                  placeholder="Réponse longue"
+                  disabled
+                ></textarea>
+              </div>
+
+              <div *ngSwitchCase="'single_choice'" class="preview-options">
+                <div
+                  class="preview-option"
+                  *ngFor="let option of question.options"
+                >
+                  <input type="radio" disabled />
+                  <label>{{ option.text }}</label>
+                </div>
+              </div>
+
+              <div *ngSwitchCase="'multiple_choice'" class="preview-options">
+                <div
+                  class="preview-option"
+                  *ngFor="let option of question.options"
+                >
+                  <input type="checkbox" disabled />
+                  <label>{{ option.text }}</label>
+                </div>
+              </div>
+
+              <div *ngSwitchCase="'rating'" class="preview-rating">
+                <div class="rating-stars">
+                  <span class="material-icons">star</span>
+                  <span class="material-icons">star</span>
+                  <span class="material-icons">star</span>
+                  <span class="material-icons">star_border</span>
+                  <span class="material-icons">star_border</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Étape 5: Diffusion -->
+    <div class="form-step" *ngSwitchCase="5">
+      <h2 class="form-section-title">Diffusion de l'enquête</h2>
+
+      <div class="publish-options">
+        <div class="publish-option">
+          <input
+            type="radio"
+            id="publish-now"
+            name="publishOption"
+            value="now"
+            checked
+          />
+          <label for="publish-now">Publier maintenant</label>
+        </div>
+
+        <div class="publish-option">
+          <input
+            type="radio"
+            id="publish-later"
+            name="publishOption"
+            value="later"
+          />
+          <label for="publish-later">Programmer la publication</label>
+
+          <div class="schedule-container" *ngIf="publishOption === 'later'">
+            <input
+              type="date"
+              class="form-control"
+              placeholder="Date de début"
+            />
+            <input
+              type="time"
+              class="form-control"
+              placeholder="Heure de début"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="publish-confirmation">
+        <p>
+          Après la publication, vous pourrez distribuer votre enquête via les
+          méthodes suivantes :
+        </p>
+        <ul class="distribution-methods">
+          <li>
+            <i class="material-icons">email</i>
+            <span>Invitations par email</span>
+          </li>
+          <li>
+            <i class="material-icons">qr_code</i>
+            <span>Code QR</span>
+          </li>
+          <li>
+            <i class="material-icons">link</i>
+            <span>Lien direct</span>
+          </li>
+          <li>
+            <i class="material-icons">code</i>
+            <span>Intégration iframe</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Boutons de navigation -->
+  <div class="form-actions">
+    <button
+      class="btn btn-secondary"
+      *ngIf="currentStep > 1"
+      (click)="prevStep()"
+    >
+      Précédent
+    </button>
+    <button class="btn btn-secondary" (click)="saveDraft()">Enregistrer</button>
+    <button
+      class="btn btn-primary"
+      *ngIf="currentStep < 5"
+      (click)="nextStep()"
+    >
+      Suivant
+    </button>
+    <button
+      class="btn btn-success"
+      *ngIf="currentStep === 5"
+      (click)="publishSurvey()"
+    >
+      Publier
+    </button>
+  </div>
+</div>

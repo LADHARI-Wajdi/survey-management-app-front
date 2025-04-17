@@ -1,0 +1,23 @@
+<!-- layouts/auth-layout/auth-layout.component.html -->
+<div class="auth-layout">
+  <div class="auth-background">
+    <div class="overlay"></div>
+  </div>
+
+  <div class="auth-container">
+    <div class="auth-header">
+      <div class="logo">
+        <img src="assets/images/logo.svg" alt="Logo" />
+        <span>SurveyApp</span>
+      </div>
+    </div>
+
+    <div class="auth-content">
+      <router-outlet></router-outlet>
+    </div>
+
+    <div class="auth-footer">
+      <p>&copy; {{ currentYear }} SurveyApp - Tous droits réservés</p>
+    </div>
+  </div>
+</div>

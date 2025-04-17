@@ -1,0 +1,514 @@
+// Variables
+$primary-color: #3f51b5;
+$secondary-color: #ff4081;
+$accent-color: #00bcd4;
+$background-color: #f5f7fa;
+$text-color: #202124;
+$text-secondary-color: #5f6368;
+$success-color: #4caf50;
+$warning-color: #ffc107;
+$error-color: #f44336;
+$border-color: #e0e0e0;
+
+.analytics-dashboard {
+  .page-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: $text-color;
+    margin-bottom: 20px;
+    font-family: "Roboto", sans-serif;
+  }
+}
+
+// Filters
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 30px;
+
+  .filter-item {
+    flex: 1;
+    min-width: 180px;
+
+    label {
+      display: block;
+      font-size: 14px;
+      color: $text-secondary-color;
+      margin-bottom: 5px;
+      font-family: "Roboto", sans-serif;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid $border-color;
+      border-radius: 4px;
+      font-size: 14px;
+      font-family: "Open Sans", sans-serif;
+      appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%235F6368'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      background-size: 20px;
+    }
+  }
+
+  .export-btn {
+    align-self: flex-end;
+    white-space: nowrap;
+
+    i {
+      margin-right: 5px;
+    }
+  }
+}
+
+// Summary Card
+.summary-card {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-bottom: 30px;
+
+  .section-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: $text-color;
+    margin-bottom: 15px;
+    font-family: "Roboto", sans-serif;
+  }
+
+  .summary-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      min-width: 100px;
+
+      .stat-label {
+        font-size: 12px;
+        color: $text-secondary-color;
+        margin-bottom: 5px;
+        font-family: "Roboto", sans-serif;
+      }
+
+      .stat-value {
+        font-size: 24px;
+        font-weight: bold;
+        font-family: "Roboto", sans-serif;
+
+        &.primary {
+          color: $primary-color;
+        }
+
+        &.secondary {
+          color: $secondary-color;
+        }
+
+        &.accent {
+          color: $accent-color;
+        }
+
+        &.success {
+          color: $success-color;
+        }
+      }
+    }
+  }
+}
+
+// Analytics Content
+.analytics-content {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 20px;
+  margin-bottom: 30px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// Chart Card
+.chart-card {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+
+    .section-title {
+      font-size: 16px;
+      font-weight: bold;
+      color: $text-color;
+      margin: 0;
+      font-family: "Roboto", sans-serif;
+    }
+
+    .chart-legend {
+      display: flex;
+      gap: 15px;
+
+      .legend-item {
+        display: flex;
+        align-items: center;
+
+        .legend-color {
+          width: 12px;
+          height: 12px;
+          border-radius: 2px;
+          margin-right: 5px;
+
+          &.primary {
+            background-color: $primary-color;
+          }
+
+          &.secondary {
+            background-color: $secondary-color;
+          }
+
+          &.accent {
+            background-color: $accent-color;
+          }
+        }
+
+        span {
+          font-size: 12px;
+          color: $text-secondary-color;
+          font-family: "Open Sans", sans-serif;
+        }
+      }
+    }
+  }
+
+  .chart-container {
+    position: relative;
+    height: 200px;
+  }
+}
+
+// Responses Card
+.responses-card {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+
+  .section-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: $text-color;
+    margin-bottom: 15px;
+    font-family: "Roboto", sans-serif;
+  }
+
+  .responses-list {
+    .response-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid $border-color;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      .response-user {
+        flex: 1;
+        font-size: 14px;
+        color: $text-color;
+        font-family: "Open Sans", sans-serif;
+      }
+
+      .response-rating {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 500;
+        margin: 0 10px;
+        font-family: "Roboto", sans-serif;
+
+        &.rating-high {
+          background-color: rgba($success-color, 0.1);
+          color: $success-color;
+        }
+
+        &.rating-medium {
+          background-color: rgba($warning-color, 0.1);
+          color: $warning-color;
+        }
+
+        &.rating-low {
+          background-color: rgba($error-color, 0.1);
+          color: $error-color;
+        }
+      }
+
+      .response-date {
+        font-size: 12px;
+        color: $text-secondary-color;
+        text-align: right;
+        min-width: 100px;
+        font-family: "Open Sans", sans-serif;
+      }
+    }
+
+    .no-responses {
+      padding: 20px;
+      text-align: center;
+      color: $text-secondary-color;
+      font-family: "Open Sans", sans-serif;
+    }
+  }
+}
+
+// Questions Analysis
+.questions-analysis {
+  margin-top: 20px;
+
+  .section-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: $text-color;
+    margin-bottom: 15px;
+    font-family: "Roboto", sans-serif;
+  }
+
+  .question-card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-bottom: 20px;
+
+    .question-title {
+      font-size: 16px;
+      font-weight: 500;
+      color: $text-color;
+      margin-bottom: 15px;
+      font-family: "Roboto", sans-serif;
+    }
+
+    .question-stats {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 20px;
+
+      .question-stat-item {
+        .stat-label {
+          font-size: 12px;
+          color: $text-secondary-color;
+          margin-bottom: 5px;
+          font-family: "Roboto", sans-serif;
+        }
+
+        .stat-value {
+          font-size: 18px;
+          font-weight: 500;
+          color: $primary-color;
+          font-family: "Roboto", sans-serif;
+        }
+      }
+    }
+
+    .question-chart {
+      height: 200px;
+    }
+
+    .rating-distribution {
+      .rating-bar {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+
+        .rating-label {
+          min-width: 50px;
+          font-size: 14px;
+          color: $text-secondary-color;
+          margin-right: 10px;
+          font-family: "Open Sans", sans-serif;
+        }
+
+        .rating-value-bar {
+          height: 20px;
+          background-color: $secondary-color;
+          border-radius: 4px;
+          display: flex;
+          align-items: center;
+          padding: 0 10px;
+          transition: width 0.3s ease;
+
+          .rating-value-text {
+            font-size: 12px;
+            color: white;
+            font-weight: 500;
+            font-family: "Roboto", sans-serif;
+          }
+        }
+      }
+    }
+
+    .text-responses {
+      .word-cloud {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+
+        .word-item {
+          margin: 5px;
+          padding: 3px 6px;
+          color: $primary-color;
+          font-family: "Roboto", sans-serif;
+        }
+      }
+    }
+
+    .no-chart {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+
+      p {
+        font-size: 14px;
+        color: $text-secondary-color;
+        font-family: "Open Sans", sans-serif;
+      }
+    }
+  }
+}
+
+// Loading State
+.loading-state {
+  padding: 50px;
+  text-align: center;
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    margin: 0 auto 20px;
+    border: 4px solid rgba($primary-color, 0.2);
+    border-top-color: $primary-color;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  p {
+    font-size: 14px;
+    color: $text-secondary-color;
+    font-family: "Open Sans", sans-serif;
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+// Empty State
+.empty-state {
+  padding: 50px;
+  text-align: center;
+
+  .empty-icon {
+    font-size: 48px;
+    color: $border-color;
+    margin-bottom: 20px;
+
+    i {
+      font-size: 48px;
+    }
+  }
+
+  h2 {
+    font-size: 18px;
+    color: $text-color;
+    margin-bottom: 10px;
+    font-family: "Roboto", sans-serif;
+    font-weight: 500;
+  }
+
+  p {
+    font-size: 14px;
+    color: $text-secondary-color;
+    margin-bottom: 20px;
+    font-family: "Open Sans", sans-serif;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-family: "Roboto", sans-serif;
+    font-weight: 500;
+
+    &.btn-primary {
+      background-color: $primary-color;
+      color: white;
+
+      &:hover {
+        background-color: darken($primary-color, 5%);
+      }
+    }
+  }
+}
+
+// Buttons
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-family: "Roboto", sans-serif;
+  font-weight: 500;
+
+  i {
+    margin-right: 5px;
+  }
+
+  &.btn-primary {
+    background-color: $primary-color;
+    color: white;
+
+    &:hover {
+      background-color: darken($primary-color, 5%);
+    }
+  }
+
+  &.btn-secondary {
+    background-color: white;
+    border: 1px solid $border-color;
+    color: $text-secondary-color;
+
+    &:hover {
+      background-color: darken(white, 2%);
+    }
+  }
+}

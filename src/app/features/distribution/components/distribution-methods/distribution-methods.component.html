@@ -1,0 +1,323 @@
+<div class="distribution-container">
+  <h1 class="page-title">
+    Distribution - {{ currentSurvey?.title || "Enquête" }}
+  </h1>
+
+  <!-- Onglets des méthodes de distribution -->
+  <div class="tab-container">
+    <div class="tabs">
+      <div
+        class="tab"
+        [ngClass]="{ active: activeTab === 'email' }"
+        (click)="setActiveTab('email')"
+      >
+        <i class="material-icons">email</i>
+        <span>Email</span>
+      </div>
+      <div
+        class="tab"
+        [ngClass]="{ active: activeTab === 'qrcode' }"
+        (click)="setActiveTab('qrcode')"
+      >
+        <i class="material-icons">qr_code</i>
+        <span>QR Code</span>
+      </div>
+      <div
+        class="tab"
+        [ngClass]="{ active: activeTab === 'link' }"
+        (click)="setActiveTab('link')"
+      >
+        <i class="material-icons">link</i>
+        <span>Lien</span>
+      </div>
+      <div
+        class="tab"
+        [ngClass]="{ active: activeTab === 'iframe' }"
+        (click)="setActiveTab('iframe')"
+      >
+        <i class="material-icons">code</i>
+        <span>Iframe</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenu du panneau actif -->
+  <div class="panel-container">
+    <!-- Panneau Email -->
+    <div class="panel" *ngIf="activeTab === 'email'">
+      <h2 class="panel-title">Inviter des participants par email</h2>
+
+      <form [formGroup]="emailForm">
+        <div class="form-group">
+          <label for="recipients"
+            >Destinataires (séparés par des virgules) *</label
+          >
+          <textarea
+            id="recipients"
+            formControlName="recipients"
+            class="form-control"
+            placeholder="exemple@domaine.com, exemple2@domaine.com"
+          ></textarea>
+          <div
+            class="error-message"
+            *ngIf="
+              emailForm.get('recipients')?.invalid &&
+              emailForm.get('recipients')?.touched
+            "
+          >
+            Les destinataires sont obligatoires
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="subject">Sujet de l'email *</label>
+          <input
+            type="text"
+            id="subject"
+            formControlName="subject"
+            class="form-control"
+            placeholder="Invitation à participer à notre enquête"
+          />
+          <div
+            class="error-message"
+            *ngIf="
+              emailForm.get('subject')?.invalid &&
+              emailForm.get('subject')?.touched
+            "
+          >
+            Le sujet est obligatoire
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="template">Modèle d'email</label>
+          <select
+            id="template"
+            formControlName="template"
+            class="form-control"
+            (change)="onTemplateChange()"
+          >
+            <option value="standard">Standard</option>
+            <option value="formal">Formel</option>
+            <option value="friendly">Amical</option>
+            <option value="reminder">Rappel</option>
+            <option value="custom">Personnalisé</option>
+          </select>
+        </div>
+
+        <div
+          class="form-group"
+          *ngIf="emailForm.get('template')?.value === 'custom'"
+        >
+          <label for="customMessage">Message personnalisé</label>
+          <textarea
+            id="customMessage"
+            formControlName="customMessage"
+            class="form-control"
+            rows="6"
+          ></textarea>
+        </div>
+
+        <div class="template-preview">
+          <h3>Aperçu du modèle</h3>
+          <div class="template-box">
+            <div [innerHTML]="getTemplatePreview()"></div>
+          </div>
+        </div>
+
+        <div class="stats-container">
+          <div class="stats-box">
+            <span class="stats-label">Déjà invités</span>
+            <span class="stats-value"
+              >{{ invitationStats.sentCount }} participants</span
+            >
+          </div>
+          <div class="stats-box">
+            <span class="stats-label">Taux d'ouverture</span>
+            <span class="stats-value">{{ invitationStats.openRate }}%</span>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="previewEmail()"
+          >
+            Prévisualiser
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary"
+            (click)="sendInvitations()"
+            [disabled]="emailForm.invalid"
+          >
+            Envoyer
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Panneau QR Code -->
+    <div class="panel" *ngIf="activeTab === 'qrcode'">
+      <h2 class="panel-title">Partager via QR Code</h2>
+
+      <div class="qrcode-container">
+        <div class="qrcode-box">
+          <!-- QR Code généré -->
+          <div class="qrcode-image" *ngIf="qrCodeDataUrl">
+            <img [src]="qrCodeDataUrl" alt="QR Code pour l'enquête" />
+          </div>
+          <div class="qrcode-placeholder" *ngIf="!qrCodeDataUrl">
+            <i class="material-icons">qr_code</i>
+            <p>QR Code en cours de génération...</p>
+          </div>
+        </div>
+
+        <div class="qrcode-actions">
+          <button class="btn btn-primary" (click)="downloadQrCode()">
+            <i class="material-icons">download</i> Télécharger
+          </button>
+          <button class="btn btn-secondary" (click)="printQrCode()">
+            <i class="material-icons">print</i> Imprimer
+          </button>
+        </div>
+      </div>
+
+      <div class="qrcode-info">
+        <h3>Comment utiliser</h3>
+        <p>
+          Partagez ce QR Code sur des supports imprimés, des présentations ou
+          des écrans. Les participants pourront scanner le code avec leur
+          smartphone pour accéder directement à l'enquête.
+        </p>
+      </div>
+    </div>
+
+    <!-- Panneau Lien -->
+    <div class="panel" *ngIf="activeTab === 'link'">
+      <h2 class="panel-title">Partager via lien direct</h2>
+
+      <div class="link-container">
+        <div class="link-box">
+          <input
+            type="text"
+            class="form-control"
+            [value]="surveyLink"
+            readonly
+            #linkInput
+          />
+          <button class="btn btn-icon" (click)="copyLink(linkInput)">
+            <i class="material-icons">content_copy</i>
+          </button>
+        </div>
+
+        <div class="link-actions">
+          <div class="form-group">
+            <label for="expirationDate">Date d'expiration (optionnel)</label>
+            <input
+              type="date"
+              id="expirationDate"
+              class="form-control"
+              [(ngModel)]="expirationDate"
+            />
+          </div>
+
+          <button class="btn btn-primary" (click)="updateLink()">
+            <i class="material-icons">refresh</i> Mettre à jour le lien
+          </button>
+        </div>
+      </div>
+
+      <div class="link-social">
+        <h3>Partager sur les réseaux sociaux</h3>
+        <div class="social-buttons">
+          <button
+            class="btn btn-social btn-facebook"
+            (click)="shareOnSocial('facebook')"
+          >
+            <i class="material-icons">facebook</i>
+          </button>
+          <button
+            class="btn btn-social btn-twitter"
+            (click)="shareOnSocial('twitter')"
+          >
+            <i class="material-icons">twitter</i>
+          </button>
+          <button
+            class="btn btn-social btn-linkedin"
+            (click)="shareOnSocial('linkedin')"
+          >
+            <i class="material-icons">linkedin</i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panneau Iframe -->
+    <div class="panel" *ngIf="activeTab === 'iframe'">
+      <h2 class="panel-title">Intégrer via iframe</h2>
+
+      <div class="iframe-container">
+        <div class="iframe-options">
+          <div class="form-group">
+            <label for="iframeWidth">Largeur</label>
+            <input
+              type="number"
+              id="iframeWidth"
+              [(ngModel)]="iframeWidth"
+              class="form-control"
+              min="200"
+              max="1200"
+              step="10"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="iframeHeight">Hauteur</label>
+            <input
+              type="number"
+              id="iframeHeight"
+              [(ngModel)]="iframeHeight"
+              class="form-control"
+              min="200"
+              max="1200"
+              step="10"
+            />
+          </div>
+
+          <button class="btn btn-primary" (click)="generateIframeCode()">
+            Mettre à jour le code
+          </button>
+        </div>
+
+        <div class="iframe-code">
+          <h3>Code d'intégration</h3>
+          <textarea class="form-control" readonly #iframeCode>{{
+            iframeCodeText
+          }}</textarea>
+          <button
+            class="btn btn-secondary"
+            (click)="copyIframeCode(iframeCode)"
+          >
+            <i class="material-icons">content_copy</i> Copier le code
+          </button>
+        </div>
+
+        <div class="iframe-preview">
+          <h3>Aperçu</h3>
+          <div
+            class="iframe-preview-container"
+            [style.width.px]="iframeWidth"
+            [style.height.px]="iframeHeight"
+          >
+            <div class="iframe-placeholder">
+              <i class="material-icons">web</i>
+              <p>Votre enquête sera affichée ici</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

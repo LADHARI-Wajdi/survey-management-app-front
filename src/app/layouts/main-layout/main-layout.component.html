@@ -1,0 +1,184 @@
+<!-- layouts/main-layout/main-layout.component.html -->
+<div class="main-layout" [ngClass]="{ 'menu-collapsed': isMenuCollapsed }">
+  <!-- Sidebar navigation -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <img src="assets/images/logo.svg" alt="Logo" />
+        <span *ngIf="!isMenuCollapsed">SurveyApp</span>
+      </div>
+      <button class="toggle-btn" (click)="toggleMenu()">
+        <i
+          class="fa"
+          [ngClass]="isMenuCollapsed ? 'fa-angle-right' : 'fa-angle-left'"
+        ></i>
+      </button>
+    </div>
+
+    <div class="sidebar-content">
+      <nav class="main-nav">
+        <ul>
+          <li>
+            <a
+              routerLink="/home"
+              [ngClass]="{
+                active: activeRoute === '/home' || activeRoute === '/'
+              }"
+            >
+              <i class="fa fa-home"></i>
+              <span *ngIf="!isMenuCollapsed">Accueil</span>
+            </a>
+          </li>
+          <li>
+            <a
+              routerLink="/surveys"
+              [ngClass]="{ active: activeRoute.includes('/surveys') }"
+            >
+              <i class="fa fa-list-alt"></i>
+              <span *ngIf="!isMenuCollapsed">Mes enquêtes</span>
+            </a>
+          </li>
+          <li>
+            <a
+              routerLink="/question-bank"
+              [ngClass]="{ active: activeRoute.includes('/question-bank') }"
+            >
+              <i class="fa fa-question-circle"></i>
+              <span *ngIf="!isMenuCollapsed">Banque de questions</span>
+            </a>
+          </li>
+          <li>
+            <a
+              routerLink="/analytics"
+              [ngClass]="{ active: activeRoute.includes('/analytics') }"
+            >
+              <i class="fa fa-chart-bar"></i>
+              <span *ngIf="!isMenuCollapsed">Analyses</span>
+            </a>
+          </li>
+
+          <!-- Admin section -->
+          <li *ngIf="hasRole('admin')">
+            <div class="nav-section" *ngIf="!isMenuCollapsed">
+              Administration
+            </div>
+          </li>
+          <li *ngIf="hasRole('admin')">
+            <a
+              routerLink="/admin/dashboard"
+              [ngClass]="{ active: activeRoute.includes('/admin/dashboard') }"
+            >
+              <i class="fa fa-tachometer-alt"></i>
+              <span *ngIf="!isMenuCollapsed">Tableau de bord</span>
+            </a>
+          </li>
+          <li *ngIf="hasRole('admin')">
+            <a
+              routerLink="/admin/users"
+              [ngClass]="{ active: activeRoute.includes('/admin/users') }"
+            >
+              <i class="fa fa-users"></i>
+              <span *ngIf="!isMenuCollapsed">Utilisateurs</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="user-menu" *ngIf="currentUser">
+        <div class="user-avatar">
+          <img
+            *ngIf="currentUser.profilePicture"
+            [src]="currentUser.profilePicture"
+            alt="Profile"
+          />
+          <div *ngIf="!currentUser.profilePicture" class="avatar-placeholder">
+            {{ currentUser.firstName?.charAt(0)
+            }}{{ currentUser.lastName?.charAt(0) }}
+          </div>
+        </div>
+        <div class="user-details" *ngIf="!isMenuCollapsed">
+          <span class="user-name"
+            >{{ currentUser.firstName }} {{ currentUser.lastName }}</span
+          >
+          <span class="user-role">{{ currentUser.roles[0] | titlecase }}</span>
+        </div>
+      </div>
+      <div class="footer-actions" *ngIf="!isMenuCollapsed">
+        <button class="btn-logout" (click)="logout()">
+          <i class="fa fa-sign-out-alt"></i>
+          Déconnexion
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main content area -->
+  <div class="main-content">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <button class="menu-toggle-btn d-md-none" (click)="toggleMenu()">
+          <i class="fa fa-bars"></i>
+        </button>
+        <div class="page-title">
+          <!-- This will be updated dynamically based on the current route -->
+          <h1>{{ pageTitle }}</h1>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="search-box">
+          <input type="text" placeholder="Rechercher..." />
+          <button>
+            <i class="fa fa-search"></i>
+          </button>
+        </div>
+        <div class="header-actions">
+          <div class="action-item notifications">
+            <button class="btn-icon">
+              <i class="fa fa-bell"></i>
+              <span class="badge" *ngIf="notificationsCount > 0">{{
+                notificationsCount
+              }}</span>
+            </button>
+          </div>
+          <div class="action-item help">
+            <button class="btn-icon">
+              <i class="fa fa-question-circle"></i>
+            </button>
+          </div>
+          <div class="action-item user-dropdown d-none d-md-block">
+            <button class="btn-user">
+              <span class="user-name"
+                >{{ currentUser?.firstName }} {{ currentUser?.lastName }}</span
+              >
+              <i class="fa fa-chevron-down"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main content -->
+    <main class="content">
+      <!-- Loading indicator -->
+      <app-loader></app-loader>
+
+      <!-- Notifications container -->
+      <app-notification></app-notification>
+
+      <!-- Router outlet for content -->
+      <router-outlet></router-outlet>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="footer-content">
+        <p>&copy; {{ currentYear }} SurveyApp - Tous droits réservés</p>
+      </div>
+    </footer>
+  </div>
+</div>
+
+

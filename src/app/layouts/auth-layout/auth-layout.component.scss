@@ -1,0 +1,107 @@
+// layouts/auth-layout/auth-layout.component.scss
+.auth-layout {
+  min-height: 100vh;
+  display: flex;
+  position: relative;
+  overflow: hidden;
+
+  .auth-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url("/assets/images/auth-bg.jpg");
+    background-size: cover;
+    background-position: center;
+
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        135deg,
+        rgba(63, 81, 181, 0.8) 0%,
+        rgba(100, 181, 246, 0.8) 100%
+      );
+    }
+  }
+
+  .auth-container {
+    width: 100%;
+    max-width: 100%;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    z-index: 10;
+
+    .auth-header {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      margin-bottom: 30px;
+
+      .logo {
+        display: flex;
+        align-items: center;
+
+        img {
+          height: 40px;
+          width: auto;
+          margin-right: 10px;
+        }
+
+        span {
+          font-size: 24px;
+          font-weight: 600;
+          color: white;
+        }
+      }
+    }
+
+    .auth-content {
+      width: 100%;
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .auth-footer {
+      width: 100%;
+      text-align: center;
+      padding: 15px 0;
+      margin-top: 30px;
+
+      p {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 14px;
+        margin: 0;
+      }
+    }
+  }
+}
+
+@media (min-width: 768px) {
+  .auth-layout {
+    .auth-background {
+      .overlay {
+        background: linear-gradient(
+          135deg,
+          rgba(63, 81, 181, 0.9) 0%,
+          rgba(100, 181, 246, 0.85) 100%
+        );
+      }
+    }
+
+    .auth-container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+  }
+}

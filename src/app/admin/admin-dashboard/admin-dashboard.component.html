@@ -1,0 +1,233 @@
+<!-- admin/admin-dashboard/admin-dashboard.component.html -->
+<div class="admin-dashboard">
+  <div class="dashboard-header">
+    <div class="header-title">
+      <h2>Tableau de bord administrateur</h2>
+      <p>Vue d'ensemble des activités et statistiques de la plateforme</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-refresh" (click)="refreshData()">
+        <i class="fa fa-sync-alt"></i>
+        Actualiser
+      </button>
+    </div>
+  </div>
+
+  <!-- Statistics Cards -->
+  <div class="stats-container">
+    <div class="stats-card">
+      <div class="card-icon users-icon">
+        <i class="fa fa-users"></i>
+      </div>
+      <div class="card-content">
+        <h3>Utilisateurs</h3>
+        <div class="stats-value">{{ stats.totalUsers }}</div>
+        <div class="stats-subtext">
+          <span class="highlight">{{ stats.activeUsers }}</span> utilisateurs
+          actifs
+        </div>
+      </div>
+    </div>
+
+    <div class="stats-card">
+      <div class="card-icon surveys-icon">
+        <i class="fa fa-list-alt"></i>
+      </div>
+      <div class="card-content">
+        <h3>Enquêtes</h3>
+        <div class="stats-value">{{ stats.totalSurveys }}</div>
+        <div class="stats-subtext">
+          <span class="highlight">{{ stats.activeSurveys }}</span> enquêtes
+          actives
+        </div>
+      </div>
+    </div>
+
+    <div class="stats-card">
+      <div class="card-icon responses-icon">
+        <i class="fa fa-reply-all"></i>
+      </div>
+      <div class="card-content">
+        <h3>Réponses</h3>
+        <div class="stats-value">{{ stats.totalResponses }}</div>
+        <div class="stats-subtext">
+          <span class="highlight">{{ stats.responsesLastMonth }}</span> ce
+          mois-ci
+        </div>
+      </div>
+    </div>
+
+    <div class="stats-card">
+      <div class="card-icon performance-icon">
+        <i class="fa fa-chart-line"></i>
+      </div>
+      <div class="card-content">
+        <h3>Performance</h3>
+        <div class="stats-value">{{ stats.completionRate }}%</div>
+        <div class="stats-subtext">taux de complétion moyen</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Dashboard Content -->
+  <div class="dashboard-content">
+    <!-- Left Column: Recent Activity -->
+    <div class="dashboard-column">
+      <div class="dashboard-card activity-card">
+        <div class="card-header">
+          <h3>Activité récente</h3>
+        </div>
+        <div class="card-body">
+          <div class="activity-list">
+            <div class="activity-item" *ngFor="let activity of recentActivity">
+              <div
+                class="activity-icon"
+                [ngClass]="getActivityClass(activity.type)"
+              >
+                <i class="fa" [ngClass]="getActivityIcon(activity.type)"></i>
+              </div>
+              <div class="activity-content">
+                <div class="activity-header">
+                  <span class="activity-user">{{ activity.userName }}</span>
+                  <span class="activity-time">{{
+                    activity.timestamp | dateFormat : "fromNow"
+                  }}</span>
+                </div>
+                <div class="activity-description">
+                  {{ activity.description }}
+                  <a
+                    *ngIf="activity.surveyId"
+                    [routerLink]="['/admin/surveys', activity.surveyId]"
+                  >
+                    {{ activity.surveyTitle }}
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-footer">
+          <a routerLink="/admin/activity">Voir toutes les activités</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Top Surveys & Charts -->
+    <div class="dashboard-column">
+      <div class="dashboard-card surveys-card">
+        <div class="card-header">
+          <h3>Enquêtes les plus populaires</h3>
+        </div>
+        <div class="card-body">
+          <table class="surveys-table">
+            <thead>
+              <tr>
+                <th>Titre</th>
+                <th>Réponses</th>
+                <th>Taux de complétion</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let survey of topSurveys">
+                <td>
+                  <a [routerLink]="['/admin/surveys', survey.id]">{{
+                    survey.title
+                  }}</a>
+                </td>
+                <td>{{ survey.responses }}</td>
+                <td>
+                  <div class="completion-bar">
+                    <div
+                      class="completion-progress"
+                      [style.width.%]="survey.completionRate"
+                    ></div>
+                  </div>
+                  <span class="completion-text"
+                    >{{ survey.completionRate }}%</span
+                  >
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card-footer">
+          <a routerLink="/admin/surveys">Voir toutes les enquêtes</a>
+        </div>
+      </div>
+
+      <!-- Charts: Users by Role & Responses by Device -->
+      <div class="charts-container">
+        <div class="dashboard-card chart-card">
+          <div class="card-header">
+            <h3>Utilisateurs par rôle</h3>
+          </div>
+          <div class="card-body">
+            <div class="chart-placeholder">
+              <!-- In a real app, this would be a chart component -->
+              <div class="pie-chart-mock">
+                <div
+                  *ngFor="let roleData of usersByRole"
+                  class="pie-segment"
+                  [style.background-color]="
+                    'var(--chart-color-' + roleData.role + ')'
+                  "
+                  [style.width.px]="80"
+                  [style.height.px]="80"
+                >
+                  <span class="segment-label">{{ roleData.role }}</span>
+                </div>
+              </div>
+              <div class="chart-legend">
+                <div *ngFor="let roleData of usersByRole" class="legend-item">
+                  <span
+                    class="legend-color"
+                    [style.background-color]="
+                      'var(--chart-color-' + roleData.role + ')'
+                    "
+                  ></span>
+                  <span class="legend-label">{{
+                    roleData.role | titlecase
+                  }}</span>
+                  <span class="legend-value"
+                    >{{ roleData.count }} ({{ roleData.percentage }}%)</span
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="dashboard-card chart-card">
+          <div class="card-header">
+            <h3>Réponses par appareil</h3>
+          </div>
+          <div class="card-body">
+            <div class="chart-placeholder">
+              <!-- In a real app, this would be a chart component -->
+              <div class="bar-chart-mock">
+                <div
+                  *ngFor="let deviceData of responsesByDevice"
+                  class="bar-container"
+                >
+                  <div class="bar-label">
+                    {{ deviceData.device | titlecase }}
+                  </div>
+                  <div class="bar">
+                    <div
+                      class="bar-fill"
+                      [style.width.%]="deviceData.percentage"
+                      [style.background-color]="
+                        'var(--chart-color-' + deviceData.device + ')'
+                      "
+                    ></div>
+                  </div>
+                  <div class="bar-value">{{ deviceData.count }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
