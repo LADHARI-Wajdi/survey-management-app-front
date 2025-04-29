@@ -25,17 +25,54 @@ import { FilterPipe } from './pipes/filter.pipe';
 import { TruncatePipe } from './pipes/truncate.pipe';
 
 @NgModule({
- 
-
-  imports: [CommonModule, RouterModule, FormsModule, ReactiveFormsModule],
+  imports: [
+    CommonModule, 
+    RouterModule, 
+    FormsModule, 
+    ReactiveFormsModule,
+    
+    // Import standalone components, directives, and pipes
+    LoaderComponent,
+    NotificationComponent,
+    ConfirmDialogComponent,
+    DataTableComponent,
+    HeaderComponent,
+    FooterComponent,
+    SidebarComponent,
+    ModalComponent,
+    
+    ClickOutsideDirective,
+    DebounceClickDirective,
+    PermissionDirective,
+    
+    DateFormatPipe,
+    FilterPipe,
+    TruncatePipe
+  ],
   exports: [
     // Modules
     CommonModule,
     RouterModule,
     FormsModule,
     ReactiveFormsModule,
-
     
+    // Re-export the standalone components, directives, and pipes
+    LoaderComponent,
+    NotificationComponent,
+    ConfirmDialogComponent,
+    DataTableComponent,
+    HeaderComponent,
+    FooterComponent,
+    SidebarComponent,
+    ModalComponent,
+    
+    ClickOutsideDirective,
+    DebounceClickDirective,
+    PermissionDirective,
+    
+    DateFormatPipe,
+    FilterPipe,
+    TruncatePipe
   ],
 })
 export class SharedModule {}

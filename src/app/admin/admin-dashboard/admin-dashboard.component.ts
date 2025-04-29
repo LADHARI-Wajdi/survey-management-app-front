@@ -1,10 +1,11 @@
-// admin/admin-dashboard/admin-dashboard.component.ts
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { forkJoin } from 'rxjs';
-import { DateFormatPipe } from "../../shared/pipes/date-format.pipe";
+import { DateFormatPipe } from '../../shared/pipes/date-format.pipe';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
+import { AuthService } from '../../core/authentication/services/auth.service';
+import { UserRole } from '../../core/models/user.model';
 
 interface DashboardStats {
   totalUsers: number;
@@ -19,7 +20,11 @@ interface DashboardStats {
 
 interface RecentActivity {
   id: string;
-  type: 'user_registration' | 'survey_creation' | 'survey_response' | 'user_login';
+  type:
+    | 'user_registration'
+    | 'survey_creation'
+    | 'survey_response'
+    | 'user_login';
   userId: string;
   userName: string;
   surveyId?: string;
@@ -33,11 +38,7 @@ interface RecentActivity {
   templateUrl: './admin-dashboard.component.html',
   styleUrls: ['./admin-dashboard.component.scss'],
   standalone: true,
-  imports: [
-    CommonModule,
-    RouterModule,
-    DateFormatPipe
-  ]
+  imports: [CommonModule, RouterModule, DateFormatPipe],
 })
 export class AdminDashboardComponent implements OnInit {
   stats: DashboardStats = {
@@ -57,21 +58,44 @@ export class AdminDashboardComponent implements OnInit {
   responsesByDevice: any[] = [];
   isLoading = false;
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient, 
+    private authService: AuthService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
-    this.loadDashboardData();
+    // Vérifier si l'utilisateur a le rôle admin
+    this.authService.currentUser$.subscribe(user => {
+      if (user && !user.roles.includes(UserRole.ADMIN)) {
+        // Rediriger vers la page appropriée s'il n'a pas les droits
+        this.authService.redirectByRole();
+      } else {
+        // Charger les données du tableau de bord
+        this.loadDashboardData();
+      }
+    });
   }
 
   loadDashboardData(): void {
     this.isLoading = true;
 
     // In a real application, these would be actual API endpoints
-    const statsRequest = this.http.get<DashboardStats>('/api/admin/dashboard/stats');
-    const activityRequest = this.http.get<RecentActivity[]>('/api/admin/dashboard/activity');
-    const topSurveysRequest = this.http.get<any[]>('/api/admin/dashboard/top-surveys');
-    const usersByRoleRequest = this.http.get<any[]>('/api/admin/dashboard/users-by-role');
-    const responsesByDeviceRequest = this.http.get<any[]>('/api/admin/dashboard/responses-by-device');
+    const statsRequest = this.http.get<DashboardStats>(
+      '/api/admin/dashboard/stats'
+    );
+    const activityRequest = this.http.get<RecentActivity[]>(
+      '/api/admin/dashboard/activity'
+    );
+    const topSurveysRequest = this.http.get<any[]>(
+      '/api/admin/dashboard/top-surveys'
+    );
+    const usersByRoleRequest = this.http.get<any[]>(
+      '/api/admin/dashboard/users-by-role'
+    );
+    const responsesByDeviceRequest = this.http.get<any[]>(
+      '/api/admin/dashboard/responses-by-device'
+    );
 
     forkJoin({
       stats: statsRequest,
@@ -79,8 +103,8 @@ export class AdminDashboardComponent implements OnInit {
       topSurveys: topSurveysRequest,
       usersByRole: usersByRoleRequest,
       responsesByDevice: responsesByDeviceRequest,
-    }).subscribe(
-      (results) => {
+    }).subscribe({
+      next: (results) => {
         this.stats = results.stats;
         this.recentActivity = results.activity;
         this.topSurveys = results.topSurveys;
@@ -88,14 +112,14 @@ export class AdminDashboardComponent implements OnInit {
         this.responsesByDevice = results.responsesByDevice;
         this.isLoading = false;
       },
-      (error) => {
+      error: (error) => {
         console.error('Error loading dashboard data:', error);
         this.isLoading = false;
 
         // For demo purposes, load mock data
         this.loadMockData();
       }
-    );
+    });
   }
 
   /**

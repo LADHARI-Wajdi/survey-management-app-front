@@ -1,8 +1,11 @@
+// src/app/admin/components/user-management/user-detail/user-detail.component.ts
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { UserProfileModel } from '../models/user-profile.model';
 import { UserManagementService } from '../services/user-management.service';
+import { forkJoin } from 'rxjs';
+import { SurveyResultsComponent } from '../../../../features/analytics/components/survey-results/survey-results.component';
+import { User, UserRole } from '../../../../core/authentication/models/user.model';
 
 @Component({
   selector: 'app-user-detail',
@@ -10,9 +13,13 @@ import { UserManagementService } from '../services/user-management.service';
   styleUrls: ['./user-detail.component.scss']
 })
 export class UserDetailComponent implements OnInit {
+  static parseUser(user: User): import("../../../../core/authentication/models/user.model").UserAuth | null {
+    throw new Error('Method not implemented.');
+  }
   userId: string;
-  user: UserProfileModel | null = null;
+  user: UserRole | null = null;
   isLoading = true;
+  userActivity: any[] = [];
   
   constructor(
     private route: ActivatedRoute,
@@ -34,16 +41,9 @@ export class UserDetailComponent implements OnInit {
       return;
     }
 
-    this.userService.getUserById(this.userId).subscribe({
-      next: (user) => {
-        this.user = user;
-        this.isLoading = false;
-      },
-      error: (error) => {
-        console.error('Erreur lors du chargement de l\'utilisateur', error);
-        this.snackBar.open('Erreur lors du chargement de l\'utilisateur', 'Fermer', { duration: 3000 });
-        this.isLoading = false;
-      }
-    });
+    this.isLoading = true;
+
+    // Utiliser forkJoin pour charger l'utilisateur et ses activités en parallèle
+//
   }
 }

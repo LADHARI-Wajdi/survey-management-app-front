@@ -1,41 +1,83 @@
-import { Component, NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { Routes } from '@angular/router';
 
 // Layouts
 import { MainLayoutComponent } from './layouts/main-layout/main-layout.component';
 import { AuthLayoutComponent } from './layouts/auth-layout/auth-layout.component';
 import { AdminLayoutComponent } from './layouts/admin-layout/admin-layout.component';
 
-// Guards
-
-// Auth Components (for direct routing)
+// Auth Components
 import { LoginComponent } from './core/authentication/login/login.component';
 import { RegisterComponent } from './core/authentication/register/register.component';
 import { ForgotPasswordComponent } from './core/authentication/forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './core/authentication/reset-password/reset-password.component';
 
-// Main Components
+// Admin Components
 import { AdminDashboardComponent } from './admin/admin-dashboard/admin-dashboard.component';
-import { SurveyParticipantViewComponent } from './features/survey-taking/components/survey-participant-view/survey-participant-view.component';
-import { authGuard } from './core/guards/auth.guard';
-import { RoleGuard } from './core/guards/role.guard';
 
-const newLocal = './features/dashboard/dashboard.module';
+// Feature Components
+import { SurveyParticipantViewComponent } from './features/survey-taking/components/survey-participant-view/survey-participant-view.component';
+
+// Guards
+import { authGuard } from './core/guards/auth.guard';
+
+// Access Denied Component
+import { AccessDeniedComponent } from './shared/components/access-denied/access-denied.component';
+import { roleGuard } from './core/guards/role.guard';
+
 export const routes: Routes = [
   {
     path: '',
     component: MainLayoutComponent,
+    canActivate: [authGuard],
     children: [
       {
-        path: 'dashboard',
-        loadChildren: () => import(newLocal).then(m => m.DashboardModule),
+        path: '',
+        redirectTo: 'dashboard',
+        pathMatch: 'full'
       },
-    ],
+      {
+        path: 'dashboard',
+        loadChildren: () => import('./features/dashboards/model/dashboard.module').then(m => m.DashboardModule),
+      },
+      {
+        path: 'surveys',
+        loadChildren: () => import('./features/survey-management/survey-management.module').then(
+          (m) => m.SurveyManagementModule
+        ),
+      },
+      {
+        path: 'question-bank',
+        loadChildren: () => import('./features/question-bank/question-bank.module').then(
+          (m) => m.QuestionBankModule
+        ),
+      },
+      {
+        path: 'analytics',
+        loadChildren: () => import('./features/analytics/analytics.module').then(
+          (m) => m.AnalyticsModule
+        ),
+        canActivate: [roleGuard],
+        data: { roles: ['admin', 'investigator'] }
+      },
+      {
+        path: 'distribution',
+        loadChildren: () => import('./features/distribution/distribution.module').then(
+          (m) => m.DistributionModule
+        ),
+        canActivate: [roleGuard],
+        data: { roles: ['admin', 'investigator'] }
+      },
+    ]
   },
   {
     path: 'auth',
     component: AuthLayoutComponent,
     children: [
+      {
+        path: '',
+        redirectTo: 'login',
+        pathMatch: 'full'
+      },
       {
         path: 'login',
         component: LoginComponent,
@@ -57,7 +99,7 @@ export const routes: Routes = [
   {
     path: 'admin',
     component: AdminLayoutComponent,
-    canActivate: [authGuard, RoleGuard],
+    canActivate: [authGuard, roleGuard],
     data: { roles: ['admin'] },
     children: [
       {
@@ -72,60 +114,56 @@ export const routes: Routes = [
       {
         path: 'users',
         loadChildren: () =>
-          import(
-            './admin/components/user-management/user-management.module'
-          ).then((m) => m.UserManagementModule),
+          import('./admin/components/user-management/user-management.module').then((m) => m.UserManagementModule),
       },
     ],
   },
   {
-    path: 'surveys',
+    path: 'investigator',
     component: MainLayoutComponent,
-    canActivate: [authGuard],
-    loadChildren: () =>
-      import('./features/survey-management/survey-management.module').then(
-        (m) => m.SurveyManagementModule
-      ),
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['admin', 'investigator'] },
+    children: [
+      {
+        path: '',
+        redirectTo: 'dashboard',
+        pathMatch: 'full',
+      },
+      {
+        path: 'dashboard',
+        loadChildren: () => 
+          import('./features/dashboards/model/investigator-dashboard.module').then(m => m.InvestigatorDashboardModule),
+      },
+    ],
   },
   {
-    path: 'question-bank',
+    path: 'participant',
     component: MainLayoutComponent,
-    canActivate: [authGuard],
-    loadChildren: () =>
-      import('./features/question-bank/question-bank.module').then(
-        (m) => m.QuestionBankModule
-      ),
-  },
-  {
-    path: 'analytics',
-    component: MainLayoutComponent,
-    canActivate: [authGuard],
-    loadChildren: () =>
-      import('./features/analytics/analytics.module').then(
-        (m) => m.AnalyticsModule
-      ),
-  },
-  {
-    path: 'distribution',
-    component: MainLayoutComponent,
-    canActivate: [authGuard],
-    loadChildren: () =>
-      import('./features/distribution/distribution.module').then(
-        (m) => m.DistributionModule
-      ),
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['admin', 'participant'] },
+    children: [
+      {
+        path: '',
+        redirectTo: 'dashboard',
+        pathMatch: 'full',
+      },
+      {
+        path: 'dashboard',
+        loadChildren: () => 
+          import('./features/dashboards/model/participant-dashboard.module').then(m => m.ParticipantDashboardModule),
+      },
+    ],
   },
   {
     path: 'take-survey/:id',
     component: SurveyParticipantViewComponent,
   },
   {
+    path: 'access-denied',
+    component: AccessDeniedComponent,
+  },
+  {
     path: '**',
     redirectTo: '/dashboard',
   },
 ];
-
-@NgModule({
-  imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule],
-})
-export class AppRoutingModule {}

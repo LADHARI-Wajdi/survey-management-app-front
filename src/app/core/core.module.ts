@@ -22,9 +22,6 @@ import { AuthService } from './authentication/services/auth.service';
 import { TokenService } from './authentication/services/token.service';
 
 // Interceptors
-import { AuthInterceptor } from './interceptors/auth.interceptor';
-import { ErrorInterceptor } from './interceptors/error.interceptor';
-import { LoaderInterceptor } from './interceptors/loader.interceptor';
 import { AuthenticationModule } from './authentication/authentication.module';
 @NgModule({
   imports: [

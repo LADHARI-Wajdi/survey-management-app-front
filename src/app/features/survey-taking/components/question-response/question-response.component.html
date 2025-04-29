@@ -1,1 +1,156 @@
-<p>question-response works!</p>
+<!-- src/app/features/survey-taking/components/question-response/question-response.component.html -->
+<div class="question-response">
+    <form [formGroup]="responseForm" *ngIf="question">
+      <!-- Question title and description -->
+      <div class="question-header">
+        <h3 class="question-title">
+          {{ question.title }}
+          <span class="required-marker" *ngIf="question.isRequired">*</span>
+        </h3>
+        <p class="question-description" *ngIf="question.description">
+          {{ question.description }}
+        </p>
+      </div>
+  
+      <!-- Different input types based on question type -->
+      <div class="response-input" [ngSwitch]="question.type">
+        
+        <!-- Short Text -->
+        <div *ngSwitchCase="QuestionType.TEXT_SHORT" class="text-input">
+          <input 
+            type="text" 
+            formControlName="response" 
+            class="form-control"
+            [ngClass]="{'is-invalid': showValidation && responseForm.get('response')?.invalid}" 
+            placeholder="Votre réponse"
+          >
+          <div class="invalid-feedback" *ngIf="showValidation && responseForm.get('response')?.errors?.['required']">
+            Une réponse est requise.
+          </div>
+        </div>
+  
+        <!-- Long Text -->
+        <div *ngSwitchCase="QuestionType.TEXT_LONG" class="text-input">
+          <textarea 
+            formControlName="response" 
+            class="form-control" 
+            [ngClass]="{'is-invalid': showValidation && responseForm.get('response')?.invalid}"
+            placeholder="Votre réponse"
+            rows="4"
+          ></textarea>
+          <div class="invalid-feedback" *ngIf="showValidation && responseForm.get('response')?.errors?.['required']">
+            Une réponse est requise.
+          </div>
+        </div>
+  
+        <!-- Single Choice (Radio Buttons) -->
+        <div *ngSwitchCase="QuestionType.SINGLE_CHOICE" class="choice-input">
+          <div class="radio-group">
+            <div class="radio-option" *ngFor="let option of question.options">
+              <input 
+                type="radio" 
+                [id]="'option_' + option.id" 
+                [value]="option.value || option.id" 
+                formControlName="response"
+              >
+              <label [for]="'option_' + option.id">
+                {{ getOptionText(option) }}
+              </label>
+            </div>
+          </div>
+          <div class="invalid-feedback" *ngIf="showValidation && responseForm.get('response')?.errors?.['required']">
+            Veuillez sélectionner une option.
+          </div>
+        </div>
+  
+        <!-- Multiple Choice (Checkboxes) -->
+        <div *ngSwitchCase="QuestionType.MULTIPLE_CHOICE" class="choice-input">
+          <div class="checkbox-group">
+            <div class="checkbox-option" *ngFor="let option of question.options">
+              <input 
+                type="checkbox" 
+                [id]="'option_' + option.id" 
+                [formControlName]="option.id"
+              >
+              <label [for]="'option_' + option.id">
+                {{ getOptionText(option) }}
+              </label>
+            </div>
+          </div>
+          <div class="invalid-feedback" *ngIf="showValidation && responseForm.errors?.['atLeastOneOption']">
+            Veuillez sélectionner au moins une option.
+          </div>
+        </div>
+  
+        <!-- Rating -->
+        <div *ngSwitchCase="QuestionType.RATING" class="rating-input">
+          <div class="rating">
+            <span *ngFor="let rating of getRatingArray(5)" 
+                  class="rating-star"
+                  [ngClass]="{'selected': responseForm.get('response')?.value >= rating}"
+                  (click)="responseForm.get('response')?.setValue(rating)">
+              <i class="material-icons">{{ responseForm.get('response')?.value >= rating ? 'star' : 'star_border' }}</i>
+            </span>
+          </div>
+          <div class="invalid-feedback" *ngIf="showValidation && responseForm.get('response')?.errors?.['required']">
+            Veuillez attribuer une note.
+          </div>
+        </div>
+  
+        <!-- Date -->
+        <div *ngSwitchCase="QuestionType.DATE" class="date-input">
+          <input 
+            type="date" 
+            formControlName="response" 
+            class="form-control"
+            [ngClass]="{'is-invalid': showValidation && responseForm.get('response')?.invalid}"
+          >
+          <div class="invalid-feedback" *ngIf="showValidation && responseForm.get('response')?.errors?.['required']">
+            Veuillez sélectionner une date.
+          </div>
+        </div>
+  
+        <!-- File Upload -->
+        <div *ngSwitchCase="QuestionType.FILE" class="file-input">
+          <input 
+            type="file" 
+            class="form-control"
+            [ngClass]="{'is-invalid': showValidation && responseForm.get('response')?.invalid}"
+            (change)="onFileChange($event)"
+            [multiple]="question.settings?.allowMultipleFiles"
+            [accept]="question.settings?.acceptedFileTypes?.join(',')"
+          >
+          <small class="file-instructions" *ngIf="question.settings?.maxFileSize">
+            Taille maximale: {{ question.settings?.maxFileSize }}MB
+          </small>
+          <div class="invalid-feedback" *ngIf="showValidation && responseForm.get('response')?.errors?.['required']">
+            Veuillez télécharger un fichier.
+          </div>
+        </div>
+  
+        <!-- Numeric -->
+        <div *ngSwitchCase="QuestionType.NUMERIC" class="numeric-input">
+          <input 
+            type="number" 
+            formControlName="response" 
+            class="form-control"
+            [ngClass]="{'is-invalid': showValidation && responseForm.get('response')?.invalid}"
+
+            
+            [step]="question.settings?.step || 1"
+          >
+          <div class="invalid-feedback" *ngIf="showValidation && responseForm.get('response')?.errors?.['required']">
+            Veuillez entrer une valeur numérique.
+          </div>
+          <div class="invalid-feedback" *ngIf="showValidation && responseForm.get('response')?.errors?.['pattern']">
+            Veuillez entrer un nombre valide.
+          </div>
+        </div>
+  
+        <!-- Default case for unsupported question types -->
+        <div *ngSwitchDefault class="unsupported-type">
+          <p>Type de question non pris en charge.</p>
+        </div>
+      </div>
+    </form>
+  </div>

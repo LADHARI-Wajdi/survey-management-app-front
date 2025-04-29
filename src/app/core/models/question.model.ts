@@ -1,4 +1,4 @@
-// core/models/question.model.ts
+// src/app/core/models/question.model.ts
 export enum QuestionType {
   TEXT_SHORT = 'text_short',
   TEXT_LONG = 'text_long',
@@ -12,7 +12,13 @@ export enum QuestionType {
   NUMERIC = 'numeric',
 }
 
+// Type qui représente les différentes valeurs possibles pour une question
+export type QuestionValue = string | string[] | number | File[] | null;
+
 export interface Question {
+  skipped: any;
+  maxRating: number;
+  minRating: number;
   id: string;
   title: string;
   description?: string;
@@ -23,6 +29,8 @@ export interface Question {
   settings?: QuestionSettings;
   conditionalLogic?: ConditionalLogic[];
   validations?: QuestionValidation[];
+  // Permettre null comme une valeur valide
+  value: QuestionValue;
 }
 
 export interface QuestionOption {

@@ -1,1 +1,54 @@
-<p>custom-chart works!</p>
+<!-- src/app/features/analytics/components/chart-components/custom-chart/custom-chart.component.html -->
+<div class="custom-chart-container" [ngClass]="{ loading: isLoading }">
+    <div class="chart-header">
+      <h3 class="chart-title" *ngIf="title">{{ title }}</h3>
+      <div class="chart-actions">
+        <button class="btn-icon" (click)="refresh()" title="Actualiser">
+          <i class="material-icons">refresh</i>
+        </button>
+        <button class="btn-icon" (click)="downloadChart()" title="Télécharger">
+          <i class="material-icons">download</i>
+        </button>
+      </div>
+    </div>
+  
+    <div class="chart-content">
+      <!-- État de chargement -->
+      <div class="loading-spinner" *ngIf="isLoading">
+        <div class="spinner"></div>
+        <span>Chargement des données...</span>
+      </div>
+  
+      <!-- Message d'erreur -->
+      <div class="error-message" *ngIf="error">
+        <i class="material-icons">error</i>
+        <span>{{ error }}</span>
+      </div>
+  
+      <!-- Message pas de données -->
+      <div class="no-data-message" *ngIf="!isLoading && (!data || !hasData())">
+        <i class="material-icons">bar_chart</i>
+        <span>Aucune donnée disponible</span>
+      </div>
+  
+      <!-- Zone du graphique -->
+      <div class="chart-area">
+        <canvas #chartCanvas [hidden]="isLoading || !data || !hasData()"></canvas>
+      </div>
+    </div>
+  
+    <!-- Légende -->
+    <div class="chart-legend" *ngIf="data && data.datasets">
+      <div class="legend-items">
+        <div class="legend-item" *ngFor="let item of data.datasets" (click)="toggleLegendItem(item)" [ngClass]="{ inactive: !item.visible }">
+          <span class="legend-color" [style.background-color]="item.backgroundColor"></span>
+          <span class="legend-label">{{ item.label }}</span>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Note de bas de page -->
+    <div class="chart-footer" *ngIf="footnote">
+      <p class="footnote">{{ footnote }}</p>
+    </div>
+  </div>

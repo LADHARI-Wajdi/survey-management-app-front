@@ -1,16 +1,22 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 
 import { SurveyService } from '../../services/survey.service';
 import { NotificationService } from '../../../../core/services/notification.service';
-import { Question } from '../../../../core/models/question.model';
+import { Question, QuestionType } from '../../../../core/models/question.model';
 import { Survey, SurveyStatus } from '../../../../core/models/survey.model';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-survey-create',
   templateUrl: './survey-create.component.html',
   styleUrls: ['./survey-create.component.scss'],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+  ],
 })
 export class SurveyCreateComponent implements OnInit {
   currentStep = 1;
@@ -76,7 +82,7 @@ export class SurveyCreateComponent implements OnInit {
       id: `q${this.questions.length + 1}`,
       title: `Question ${this.questions.length + 1}`,
       description: 'Description de la question',
-      type: 'single_choice',
+      type: QuestionType.SINGLE_CHOICE,
       isRequired: true,
       order: this.questions.length + 1,
       options: [
@@ -84,6 +90,10 @@ export class SurveyCreateComponent implements OnInit {
         { id: 'opt2', text: 'Option 2', value: 'opt2' },
         { id: 'opt3', text: 'Option 3', value: 'opt3' },
       ],
+      value: null,
+      maxRating: 0,
+      minRating: 0,
+      skipped: undefined
     };
 
     this.questions.push(newQuestion);

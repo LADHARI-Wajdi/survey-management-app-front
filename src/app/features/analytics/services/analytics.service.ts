@@ -2,192 +2,274 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { environment } from '../../../../environments/environment';
+import { ChartData } from 'chart.js';
+import { 
+  TimeRange, 
+  DashboardStats, 
+  ResponseTrend, 
+  CompletionRateData,
+  QuestionTypeDistribution,
+  DeviceBreakdown,
+  DemographicBreakdown
+} from '../models/analytics-data.model';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class AnalyticsService {
-  private apiUrl = `${environment.apiUrl}/analytics`;
-
+  private apiUrl = '/api/analytics'; // Use relative URL for Angular environments
+  
   constructor(private http: HttpClient) {}
-
-  getSurveyAnalytics(
-    surveyId: string,
-    period: string = 'all'
-  ): Observable<any> {
-    return this.http
-      .get<any>(`${this.apiUrl}/surveys/${surveyId}?period=${period}`)
-      .pipe(
-        catchError((error) => {
-          console.error('Error fetching survey analytics', error);
-          // Retourner des données fictives pour la démonstration en cas d'erreur
-          return of(this.getMockSurveyAnalytics());
-        })
-      );
-  }
-
-  getQuestionAnalytics(questionId: string): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/questions/${questionId}`).pipe(
-      catchError((error) => {
-        console.error('Error fetching question analytics', error);
-        return of({});
+  
+  getDashboardStats(timeRange: TimeRange): Observable<DashboardStats> {
+    return this.http.get<DashboardStats>(`${this.apiUrl}/dashboard-stats`, {
+      params: { timeRange }
+    }).pipe(
+      catchError(() => {
+        // Fallback to mock data if API fails
+        return of({
+          totalSurveys: 12,
+          totalResponses: 345,
+          averageCompletionRate: 78.5,
+          averageTimeToComplete: 6.2
+        });
       })
     );
   }
-
-  exportSurveyData(surveyId: string, format: string = 'csv'): Observable<Blob> {
-    return this.http
-      .get(`${this.apiUrl}/surveys/${surveyId}/export/${format}`, {
-        responseType: 'blob',
-      })
-      .pipe(
-        catchError((error) => {
-          console.error('Error exporting survey data', error);
-          // Retourner un blob vide en cas d'erreur
-          return of(new Blob([]));
-        })
-      );
-  }
-
-  getDashboardStats(): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/dashboard`).pipe(
-      catchError((error) => {
-        console.error('Error fetching dashboard stats', error);
-        // Retourner des données fictives pour la démonstration en cas d'erreur
-        return of(this.getMockDashboardStats());
+  
+  getResponsesOverTime(timeRange: TimeRange): Observable<ChartData> {
+    return this.http.get<ResponseTrend[]>(`${this.apiUrl}/responses-over-time`, {
+      params: { timeRange }
+    }).pipe(
+      map(data => this.transformToLineChartData(data)),
+      catchError(() => {
+        // Fallback to mock data if API fails
+        return of(this.getMockResponsesOverTimeData());
       })
     );
   }
-
-  // Méthode pour obtenir les réponses récentes d'une enquête
-  getRecentResponses(surveyId: string, limit: number = 5): Observable<any[]> {
-    return this.http
-      .get<any[]>(
-        `${this.apiUrl}/surveys/${surveyId}/responses/recent?limit=${limit}`
-      )
-      .pipe(
-        catchError((error) => {
-          console.error('Error fetching recent responses', error);
-          // Retourner des données fictives pour la démonstration en cas d'erreur
-          return of(this.getMockRecentResponses());
-        })
-      );
-  }
-
-  // Méthode pour obtenir les tendances des réponses dans le temps
-  getResponseTrends(
-    surveyId: string,
-    period: string = 'month'
-  ): Observable<any> {
-    return this.http
-      .get<any>(`${this.apiUrl}/surveys/${surveyId}/trends?period=${period}`)
-      .pipe(
-        catchError((error) => {
-          console.error('Error fetching response trends', error);
-          return of({});
-        })
-      );
-  }
-
-  // Méthode pour comparer les résultats de plusieurs enquêtes
-  compareSurveys(surveyIds: string[]): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/compare`, { surveyIds }).pipe(
-      catchError((error) => {
-        console.error('Error comparing surveys', error);
-        return of({});
+  
+  getCompletionRate(timeRange: TimeRange): Observable<ChartData> {
+    return this.http.get<CompletionRateData>(`${this.apiUrl}/completion-rate`, {
+      params: { timeRange }
+    }).pipe(
+      map(data => this.transformToPieChartData(data)),
+      catchError(() => {
+        // Fallback to mock data if API fails
+        return of(this.getMockCompletionRateData());
       })
     );
   }
-
-  // Méthodes pour générer des données fictives pour la démonstration
-  private getMockSurveyAnalytics(): any {
+  
+  getQuestionDistribution(timeRange: TimeRange): Observable<ChartData> {
+    return this.http.get<QuestionTypeDistribution[]>(`${this.apiUrl}/question-distribution`, {
+      params: { timeRange }
+    }).pipe(
+      map(data => this.transformToPieChartData(data)),
+      catchError(() => {
+        // Fallback to mock data if API fails
+        return of(this.getMockQuestionDistributionData());
+      })
+    );
+  }
+  
+  getAvgTimeToComplete(timeRange: TimeRange): Observable<ChartData> {
+    return this.http.get<number[]>(`${this.apiUrl}/avg-time-to-complete`, {
+      params: { timeRange }
+    }).pipe(
+      map(data => this.transformToBarChartData(data)),
+      catchError(() => {
+        // Fallback to mock data if API fails
+        return of(this.getMockAvgTimeToCompleteData());
+      })
+    );
+  }
+  
+  getDeviceBreakdown(timeRange: TimeRange): Observable<ChartData> {
+    return this.http.get<DeviceBreakdown>(`${this.apiUrl}/device-breakdown`, {
+      params: { timeRange }
+    }).pipe(
+      map(data => this.transformToPieChartData(data)),
+      catchError(() => {
+        // Fallback to mock data if API fails
+        return of(this.getMockDeviceBreakdownData());
+      })
+    );
+  }
+  
+  getUserDemographics(timeRange: TimeRange): Observable<ChartData> {
+    return this.http.get<DemographicBreakdown[]>(`${this.apiUrl}/user-demographics`, {
+      params: { timeRange }
+    }).pipe(
+      map(data => this.transformToBarChartData(data)),
+      catchError(() => {
+        // Fallback to mock data if API fails
+        return of(this.getMockUserDemographicsData());
+      })
+    );
+  }
+  
+  getChartData(chartId: string, timeRange: TimeRange): Observable<ChartData> {
+    return this.http.get<any>(`${this.apiUrl}/chart/${chartId}`, {
+      params: { timeRange }
+    }).pipe(
+      catchError(() => {
+        // Fallback to mock data if API fails
+        return of({
+          labels: ['No Data'],
+          datasets: [{
+            label: 'No Data Available',
+            data: [0],
+            backgroundColor: '#e0e0e0'
+          }]
+        });
+      })
+    );
+  }
+  
+  // Helper methods to transform API data to Chart.js format
+  private transformToLineChartData(data: ResponseTrend[]): ChartData {
     return {
-      totalResponses: 254,
-      completionRate: 76,
-      averageRating: 4.2,
-      averageTime: 204, // secondes
-      questions: [
-        {
-          id: 'q1',
-          title: 'Comment évaluez-vous la qualité de notre service client ?',
-          type: 'rating',
-          responseRate: 98,
-          averageRating: 4.2,
-          ratingDistribution: [
-            { rating: 1, count: 12, percentage: 5 },
-            { rating: 2, count: 30, percentage: 12 },
-            { rating: 3, count: 45, percentage: 18 },
-            { rating: 4, count: 115, percentage: 45 },
-            { rating: 5, count: 52, percentage: 20 },
-          ],
-        },
-        {
-          id: 'q2',
-          title:
-            'Quelle fonctionnalité aimeriez-vous voir ajoutée à notre produit ?',
-          type: 'text_short',
-          responseRate: 65,
-          wordFrequency: [
-            { text: 'intégration', frequency: 45 },
-            { text: 'mobile', frequency: 38 },
-            { text: 'notifications', frequency: 32 },
-            { text: 'personnalisation', frequency: 28 },
-            { text: 'rapports', frequency: 25 },
-          ],
-        },
-        {
-          id: 'q3',
-          title: 'Quelle est votre fonctionnalité préférée ?',
-          type: 'single_choice',
-          responseRate: 95,
-          optionCounts: [
-            {
-              optionId: 'opt1',
-              optionText: 'Interface utilisateur',
-              count: 98,
-              percentage: 38,
-            },
-            {
-              optionId: 'opt2',
-              optionText: 'Rapports et analyses',
-              count: 82,
-              percentage: 32,
-            },
-            {
-              optionId: 'opt3',
-              optionText: 'Support client',
-              count: 44,
-              percentage: 17,
-            },
-            {
-              optionId: 'opt4',
-              optionText: 'Intégrations',
-              count: 30,
-              percentage: 13,
-            },
-          ],
-        },
-      ],
+      labels: data.map(item => item.date),
+      datasets: [{
+        label: 'Responses',
+        data: data.map(item => item.responses),
+        borderColor: '#007bff',
+        backgroundColor: 'rgba(0, 123, 255, 0.1)',
+        tension: 0.4,
+        fill: true
+      }]
     };
   }
-
-  private getMockDashboardStats(): any {
+  
+  private transformToPieChartData(data: any): ChartData {
+    if (Array.isArray(data)) {
+      // For array data like question distribution
+      return {
+        labels: data.map(item => item.type || item.category),
+        datasets: [{
+          data: data.map(item => item.count || item.value),
+          backgroundColor: [
+            '#007bff', '#28a745', '#ffc107', '#dc3545',
+            '#17a2b8', '#6610f2', '#fd7e14', '#20c997'
+          ]
+        }]
+      };
+    } else {
+      // For object data like completion rate or device breakdown
+      return {
+        labels: Object.keys(data),
+        datasets: [{
+          data: Object.values(data),
+          backgroundColor: [
+            '#007bff', '#28a745', '#ffc107', '#dc3545',
+            '#17a2b8', '#6610f2', '#fd7e14', '#20c997'
+          ]
+        }]
+      };
+    }
+  }
+  
+  private transformToBarChartData(data: any): ChartData {
+    if (Array.isArray(data)) {
+      if (data.length > 0 && data[0].category) {
+        // For demographic breakdown
+        return {
+          labels: data.map(item => item.category),
+          datasets: [{
+            label: 'Count',
+            data: data.map(item => item.count),
+            backgroundColor: '#007bff'
+          }]
+        };
+      } else {
+        // For simple array data
+        return {
+          labels: ['1', '2', '3', '4', '5', '6', '7'].slice(0, data.length),
+          datasets: [{
+            label: 'Value',
+            data: data,
+            backgroundColor: '#007bff'
+          }]
+        };
+      }
+    } else {
+      // For object data
+      return {
+        labels: Object.keys(data),
+        datasets: [{
+          label: 'Value',
+          data: Object.values(data),
+          backgroundColor: '#007bff'
+        }]
+      };
+    }
+  }
+  
+  // Mock data methods for testing and fallback purposes
+  private getMockResponsesOverTimeData(): ChartData {
     return {
-      totalSurveys: 15,
-      activeSurveys: 8,
-      totalResponses: 1287,
-      averageCompletionRate: 72,
+      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+      datasets: [{
+        label: 'Responses',
+        data: [42, 85, 101, 98, 137, 159],
+        borderColor: '#007bff',
+        backgroundColor: 'rgba(0, 123, 255, 0.1)',
+        tension: 0.4,
+        fill: true
+      }]
     };
   }
-
-  private getMockRecentResponses(): any[] {
-    return [
-      { user: 'John D.', rating: 5, date: new Date(Date.now() - 300000) },
-      { user: 'Sandra M.', rating: 4, date: new Date(Date.now() - 1200000) },
-      { user: 'Mark L.', rating: 3, date: new Date(Date.now() - 4500000) },
-      { user: 'Emma T.', rating: 4, date: new Date(Date.now() - 9000000) },
-      { user: 'Robert K.', rating: 2, date: new Date(Date.now() - 18000000) },
-    ];
+  
+  private getMockCompletionRateData(): ChartData {
+    return {
+      labels: ['Completed', 'Abandoned'],
+      datasets: [{
+        data: [78, 22],
+        backgroundColor: ['#28a745', '#dc3545']
+      }]
+    };
+  }
+  
+  private getMockQuestionDistributionData(): ChartData {
+    return {
+      labels: ['Multiple Choice', 'Single Choice', 'Text', 'Rating', 'Other'],
+      datasets: [{
+        data: [45, 30, 15, 8, 2],
+        backgroundColor: ['#007bff', '#28a745', '#ffc107', '#17a2b8', '#6c757d']
+      }]
+    };
+  }
+  
+  private getMockAvgTimeToCompleteData(): ChartData {
+    return {
+      labels: ['Survey 1', 'Survey 2', 'Survey 3', 'Survey 4', 'Survey 5'],
+      datasets: [{
+        label: 'Minutes',
+        data: [4.5, 7.2, 3.8, 9.1, 5.6],
+        backgroundColor: '#007bff'
+      }]
+    };
+  }
+  
+  private getMockDeviceBreakdownData(): ChartData {
+    return {
+      labels: ['Desktop', 'Mobile', 'Tablet'],
+      datasets: [{
+        data: [55, 35, 10],
+        backgroundColor: ['#007bff', '#28a745', '#ffc107']
+      }]
+    };
+  }
+  
+  private getMockUserDemographicsData(): ChartData {
+    return {
+      labels: ['18-24', '25-34', '35-44', '45-54', '55+'],
+      datasets: [{
+        label: 'Users',
+        data: [15, 30, 25, 18, 12],
+        backgroundColor: '#007bff'
+      }]
+    };
   }
 }

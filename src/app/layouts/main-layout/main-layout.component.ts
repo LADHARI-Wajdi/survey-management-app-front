@@ -4,23 +4,25 @@ import { Router, NavigationEnd, ActivatedRoute, Event, RouterModule } from '@ang
 import { filter, map, mergeMap } from 'rxjs/operators';
 import { Title } from '@angular/platform-browser';
 import { AuthService } from '../../core/authentication/services/auth.service';
-import { User } from '../../core/models/user.model';
+import { User, UserRole } from '../../core/models/user.model';
 import { NotificationService } from '../../core/services/notification.service';
 import { CommonModule } from '@angular/common';
-import { SharedModule } from '../../shared/shared.module';
 import { LoaderComponent } from "../../shared/components/loader/loader.component";
 import { NotificationComponent } from "../../shared/components/notification/notification.component";
+import { SharedModule } from '../../shared/shared.module';
 
 @Component({
   selector: 'app-main-layout',
   templateUrl: './main-layout.component.html',
+  styleUrls: ['./main-layout.component.scss'],
+  standalone: true,
   imports: [
     CommonModule,
     RouterModule,
     SharedModule,
     LoaderComponent,
     NotificationComponent
-]
+  ]
 })
 export class MainLayoutComponent implements OnInit {
   currentUser: User | null = null;
@@ -29,6 +31,8 @@ export class MainLayoutComponent implements OnInit {
   pageTitle = '';
   notificationsCount = 0;
   currentYear = new Date().getFullYear();
+current: any;
+role: any;
 
   constructor(
     private authService: AuthService,
@@ -86,6 +90,6 @@ export class MainLayoutComponent implements OnInit {
 
   // Check if the user has the specified role
   hasRole(role: string): boolean {
-    return this.authService.hasRole(role);
+    return this.authService.hasRole(role as UserRole);
   }
 }

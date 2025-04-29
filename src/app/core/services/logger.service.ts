@@ -1,6 +1,6 @@
 // core/services/logger.service.ts
 import { Injectable } from '@angular/core';
-import { environment } from '../../../environments/environment';
+import { environements } from '../../../environements/environement';
 
 export enum LogLevel {
   DEBUG = 0,
@@ -14,12 +14,13 @@ export enum LogLevel {
 })
 export class LoggerService {
   // Minimum level to show logs (configured based on environment)
-  private level: LogLevel = environment.production
+  private level: LogLevel = environements.production
     ? LogLevel.WARN
     : LogLevel.DEBUG;
 
   // Enable remote logging to a server API
-  private enableRemoteLogging: boolean = environment.production;
+  private enableRemoteLogging: boolean = environements
+  .production;
 
   // Maximum number of logs to keep in memory
   private maxLogsInMemory: number = 100;
@@ -44,7 +45,7 @@ export class LoggerService {
   /**
    * Log an info message
    */
-  info(message: string, data?: any): void {
+  info(message: string, data?: any, p0?: string): void {
     this.log(LogLevel.INFO, message, data);
   }
 
@@ -58,7 +59,7 @@ export class LoggerService {
   /**
    * Log an error message
    */
-  error(message: string, data?: any): void {
+  error(message: string, data?: any, p0?: string): void {
     this.log(LogLevel.ERROR, message, data);
   }
 

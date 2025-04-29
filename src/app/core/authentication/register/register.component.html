@@ -20,14 +20,14 @@
               id="firstName"
               formControlName="firstName"
               class="form-control"
-              [ngClass]="{ 'is-invalid': submitted && f.firstName.errors }"
+              [ngClass]="{ 'is-invalid': submitted && f['firstName'].errors }"
               placeholder="Votre prénom"
             />
             <div
-              *ngIf="submitted && f.firstName.errors"
+              *ngIf="submitted && f['firstName'].errors"
               class="invalid-feedback"
             >
-              <div *ngIf="f.firstName.errors.required">
+              <div *ngIf="f['firstName'].errors['required']">
                 Le prénom est requis
               </div>
             </div>
@@ -40,14 +40,14 @@
               id="lastName"
               formControlName="lastName"
               class="form-control"
-              [ngClass]="{ 'is-invalid': submitted && f.lastName.errors }"
+              [ngClass]="{ 'is-invalid': submitted && f['lastName'].errors }"
               placeholder="Votre nom"
             />
             <div
-              *ngIf="submitted && f.lastName.errors"
+              *ngIf="submitted && f['lastName'].errors"
               class="invalid-feedback"
             >
-              <div *ngIf="f.lastName.errors.required">Le nom est requis</div>
+              <div *ngIf="f['lastName'].errors['required']">Le nom est requis</div>
             </div>
           </div>
         </div>
@@ -59,12 +59,12 @@
             id="email"
             formControlName="email"
             class="form-control"
-            [ngClass]="{ 'is-invalid': submitted && f.email.errors }"
+            [ngClass]="{ 'is-invalid': submitted && f['email'].errors }"
             placeholder="Votre adresse email"
           />
-          <div *ngIf="submitted && f.email.errors" class="invalid-feedback">
-            <div *ngIf="f.email.errors.required">L'email est requis</div>
-            <div *ngIf="f.email.errors.email">
+          <div *ngIf="submitted && f['email'].errors" class="invalid-feedback">
+            <div *ngIf="f['email'].errors['required']">L'email est requis</div>
+            <div *ngIf="f['email'].errors['email']">
               Veuillez entrer une adresse email valide
             </div>
           </div>
@@ -77,15 +77,33 @@
             id="username"
             formControlName="username"
             class="form-control"
-            [ngClass]="{ 'is-invalid': submitted && f.username.errors }"
+            [ngClass]="{ 'is-invalid': submitted && f['username'].errors }"
             placeholder="Choisissez un nom d'utilisateur"
           />
-          <div *ngIf="submitted && f.username.errors" class="invalid-feedback">
-            <div *ngIf="f.username.errors.required">
+          <div *ngIf="submitted && f['username'].errors" class="invalid-feedback">
+            <div *ngIf="f['username'].errors['required']">
               Le nom d'utilisateur est requis
             </div>
-            <div *ngIf="f.username.errors.minlength">
+            <div *ngIf="f['username'].errors['minlength']">
               Le nom d'utilisateur doit contenir au moins 4 caractères
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="role">Type de compte</label>
+          <select
+            id="role"
+            formControlName="role"
+            class="form-control"
+            [ngClass]="{ 'is-invalid': submitted && f['role'].errors }"
+          >
+            <option value="participant">Participant</option>
+            <option value="investigator">Investigateur</option>
+          </select>
+          <div *ngIf="submitted && f['role'].errors" class="invalid-feedback">
+            <div *ngIf="f['role'].errors['required']">
+              Le type de compte est requis
             </div>
           </div>
         </div>
@@ -97,17 +115,17 @@
             id="password"
             formControlName="password"
             class="form-control"
-            [ngClass]="{ 'is-invalid': submitted && f.password.errors }"
+            [ngClass]="{ 'is-invalid': submitted && f['password'].errors }"
             placeholder="Choisissez un mot de passe"
           />
-          <div *ngIf="submitted && f.password.errors" class="invalid-feedback">
-            <div *ngIf="f.password.errors.required">
+          <div *ngIf="submitted && f['password'].errors" class="invalid-feedback">
+            <div *ngIf="f['password'].errors['required']">
               Le mot de passe est requis
             </div>
-            <div *ngIf="f.password.errors.minlength">
+            <div *ngIf="f['password'].errors['minlength']">
               Le mot de passe doit contenir au moins 8 caractères
             </div>
-            <div *ngIf="f.password.errors.weakPassword">
+            <div *ngIf="f['password'].errors['weakPassword']">
               Le mot de passe doit contenir au moins une majuscule, une
               minuscule, un chiffre et un caractère spécial
             </div>
@@ -121,17 +139,17 @@
             id="confirmPassword"
             formControlName="confirmPassword"
             class="form-control"
-            [ngClass]="{ 'is-invalid': submitted && f.confirmPassword.errors }"
+            [ngClass]="{ 'is-invalid': submitted && f['confirmPassword'].errors }"
             placeholder="Confirmez votre mot de passe"
           />
           <div
-            *ngIf="submitted && f.confirmPassword.errors"
+            *ngIf="submitted && f['confirmPassword'].errors"
             class="invalid-feedback"
           >
-            <div *ngIf="f.confirmPassword.errors.required">
+            <div *ngIf="f['confirmPassword'].errors['required']">
               La confirmation du mot de passe est requise
             </div>
-            <div *ngIf="f.confirmPassword.errors.passwordMismatch">
+            <div *ngIf="f['confirmPassword'].errors['passwordMismatch']">
               Les mots de passe ne correspondent pas
             </div>
           </div>
@@ -143,7 +161,7 @@
             id="acceptTerms"
             formControlName="acceptTerms"
             class="form-check-input"
-            [ngClass]="{ 'is-invalid': submitted && f.acceptTerms.errors }"
+            [ngClass]="{ 'is-invalid': submitted && f['acceptTerms'].errors }"
           />
           <label for="acceptTerms" class="form-check-label">
             J'accepte les
@@ -151,10 +169,10 @@
             <a href="javascript:void(0)">politique de confidentialité</a>
           </label>
           <div
-            *ngIf="submitted && f.acceptTerms.errors"
+            *ngIf="submitted && f['acceptTerms'].errors"
             class="invalid-feedback"
           >
-            <div *ngIf="f.acceptTerms.errors.required">
+            <div *ngIf="f['acceptTerms'].errors['required']">
               Vous devez accepter les conditions d'utilisation
             </div>
           </div>

@@ -1,305 +1,200 @@
-import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
-import { ActivatedRoute } from '@angular/router';
-import { ChartOptions } from 'chart.js';
-
+import { Component, OnInit, OnDestroy, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { AnalyticsService } from '../../services/analytics.service';
-import { SurveyService } from '../../../survey-management/services/survey.service';
-import { ExportService } from '../../services/export.service';
-import { NotificationService } from '../../../../core/services/notification.service';
-import { Survey } from '../../../../core/models/survey.model';
+import { BarChartComponent } from '../chart-components/bar-chart/bar-chart.component';
+import { PieChartComponent } from '../chart-components/pie-chart/pie-chart.component';
+import { BubbleDataPoint, ChartData, ChartDataset, ChartTypeRegistry, Point } from 'chart.js';
+import { LineChartComponent } from '../chart-components/line-chart/line-chart.component';
+import { TimeRange } from '../../models/analytics-data.model';
 
 @Component({
   selector: 'app-analytics-dashboard',
   templateUrl: './analytics-dashboard.component.html',
   styleUrls: ['./analytics-dashboard.component.scss'],
+  standalone: true,
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
+  imports: [
+    CommonModule,
+    FormsModule,
+    LineChartComponent,
+    BarChartComponent,
+    PieChartComponent
+  ]
+
 })
-export class AnalyticsDashboardComponent implements OnInit {
-  surveys: Survey[] = [];
-  selectedSurveyId: string = '';
-  currentSurvey: Survey | null = null;
-  selectedPeriod: string = 'month';
-  responseType: string = 'all';
-  analytics: any = null;
-  recentResponses: any[] = [];
-  isLoading: boolean = false;
-
-  // Données pour les graphiques
-  barChartOptions: ChartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    scales: {
-      x: {
-        grid: {
-          display: false,
-        },
-      },
-      y: {
-        beginAtZero: true,
-        grid: {
-          color: 'rgba(0, 0, 0, 0.05)',
-        },
-      },
-    },
-  };
-
-  barChartLabels: string[] = ['1 ★', '2 ★', '3 ★', '4 ★', '5 ★'];
-  barChartLegend: boolean = false;
-  barChartPlugins: any[] = [];
-  barChartData: any[] = [
-    {
-      data: [0, 0, 0, 0, 0],
-      backgroundColor: '#FF4081',
-    },
+export class AnalyticsDashboardComponent implements OnInit, OnDestroy {
+  // Chart data properties
+  responsesOverTimeData: ChartData<keyof ChartTypeRegistry, (number | [number, number] | Point | BubbleDataPoint | null)[], unknown> | null = null;
+  completionRateData: ChartData | null = null;
+  questionDistributionData: ChartData | null = null;
+  avgTimeToCompleteData: ChartData | null = null;
+  deviceBreakdownData: ChartData | null = null;
+  userDemographicsData: ChartData | null = null;
+  
+  // Time range filter
+  selectedTimeRange: TimeRange = TimeRange.LAST_30_DAYS;
+  
+  // Loading states
+  isLoading = true;
+  hasError = false;
+  errorMessage = '';
+  
+  // Dashboard stats
+  totalSurveys = 0;
+  totalResponses = 0;
+  averageCompletionRate = 0;
+  averageTimeToComplete = 0;
+  
+  // Time range options
+  timeRangeOptions = [
+    { value: TimeRange.LAST_7_DAYS, label: 'Last 7 Days' },
+    { value: TimeRange.LAST_30_DAYS, label: 'Last 30 Days' },
+    { value: TimeRange.LAST_90_DAYS, label: 'Last 90 Days' },
+    { value: TimeRange.LAST_12_MONTHS, label: 'Last 12 Months' },
+    { value: TimeRange.ALL_TIME, label: 'All Time' }
   ];
-
-  pieChartOptions: ChartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'right',
-      },
-    },
-  };
-
-  constructor(
-    private analyticsService: AnalyticsService,
-    private surveyService: SurveyService,
-    private exportService: ExportService,
-    private notificationService: NotificationService,
-    private router: Router,
-    private route: ActivatedRoute
-  ) {}
-
+  
+  private destroy$ = new Subject<void>();
+  
+  constructor(private analyticsService: AnalyticsService) {}
+  
   ngOnInit(): void {
+    this.loadDashboardData();
+  }
+  
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+  
+  loadDashboardData(): void {
     this.isLoading = true;
-
-    // Obtenir la liste des enquêtes disponibles
-    this.surveyService.getAllSurveys().subscribe(
-      (surveys) => {
-        this.surveys = surveys;
-
-        // Vérifier si une enquête est spécifiée dans l'URL
-        this.route.params.subscribe((params) => {
-          if (params['id']) {
-            this.selectedSurveyId = params['id'];
-            this.loadSurveyAnalytics();
-          } else {
-            // Charger des statistiques générales si aucune enquête n'est sélectionnée
-            this.loadGeneralAnalytics();
-          }
-        });
-      },
-      (error) => {
-        this.notificationService.error(
-          'Erreur lors du chargement des enquêtes'
-        );
-        console.error(error);
-        this.isLoading = false;
-      }
-    );
-  }
-
-  onSurveyChange(): void {
-    if (this.selectedSurveyId) {
-      this.loadSurveyAnalytics();
-      // Mettre à jour l'URL
-      this.router.navigate(['/analytics/survey', this.selectedSurveyId]);
-    } else {
-      this.loadGeneralAnalytics();
-      this.router.navigate(['/analytics']);
-    }
-  }
-
-  onPeriodChange(): void {
-    if (this.selectedSurveyId) {
-      this.loadSurveyAnalytics();
-    } else {
-      this.loadGeneralAnalytics();
-    }
-  }
-
-  onResponseTypeChange(): void {
-    // Implémentation du filtrage par type de réponse
-    this.notificationService.info('Filtrage par type de réponse à implémenter');
-  }
-
-  exportData(): void {
-    if (!this.selectedSurveyId) {
-      this.notificationService.error(
-        'Veuillez sélectionner une enquête pour exporter les données'
-      );
-      return;
-    }
-
-    this.analyticsService
-      .exportSurveyData(this.selectedSurveyId, 'csv')
-      .subscribe(
-        (blob) => {
-          this.exportService.downloadFile(
-            blob,
-            `${this.currentSurvey?.title || 'survey'}_data.csv`
-          );
-          this.notificationService.success('Données exportées avec succès');
+    this.hasError = false;
+    
+    // Load dashboard stats
+    this.analyticsService.getDashboardStats(this.selectedTimeRange)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (stats) => {
+          this.totalSurveys = stats.totalSurveys;
+          this.totalResponses = stats.totalResponses;
+          this.averageCompletionRate = stats.averageCompletionRate;
+          this.averageTimeToComplete = stats.averageTimeToComplete;
         },
-        (error) => {
-          this.notificationService.error(
-            "Erreur lors de l'exportation des données"
-          );
-          console.error(error);
+        error: (error) => {
+          console.error('Error loading dashboard stats', error);
+          this.hasError = true;
+          this.errorMessage = 'Failed to load dashboard statistics.';
         }
-      );
+      });
+    
+    // Load chart data
+    this.loadChartData();
   }
-
-  goToDistribution(): void {
-    if (this.selectedSurveyId) {
-      this.router.navigate(['/distribution', this.selectedSurveyId]);
+  
+  loadChartData(): void {
+    // Load responses over time chart
+    this.analyticsService.getResponsesOverTime(this.selectedTimeRange)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data: ChartData<keyof ChartTypeRegistry, (number | [number, number] | Point | BubbleDataPoint | null)[], unknown> | null) => {
+          this.responsesOverTimeData = data;
+        },
+        error: (error: any) => {
+          console.error('Error loading responses over time chart', error);
+          this.hasError = true;
+          this.errorMessage = 'Failed to load chart data.';
+        }
+      });
+    
+    // Load completion rate chart
+    this.analyticsService.getCompletionRate(this.selectedTimeRange)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data: ChartData<keyof ChartTypeRegistry, (number | [number, number] | Point | BubbleDataPoint | null)[], unknown> | null) => {
+          this.completionRateData = data;
+        },
+        error: (error: any) => {
+          console.error('Error loading completion rate chart', error);
+        }
+      });
+    
+    // Load question distribution chart
+    this.analyticsService.getQuestionDistribution(this.selectedTimeRange)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data: ChartData<keyof ChartTypeRegistry, (number | [number, number] | Point | BubbleDataPoint | null)[], unknown> | null) => {
+          this.questionDistributionData = data;
+        },
+        error: (error: any) => {
+          console.error('Error loading question distribution chart', error);
+        }
+      });
+    
+    // Load average time to complete chart
+    this.analyticsService.getAvgTimeToComplete(this.selectedTimeRange)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data: ChartData<keyof ChartTypeRegistry, (number | [number, number] | Point | BubbleDataPoint | null)[], unknown> | null) => {
+          this.avgTimeToCompleteData = data;
+        },
+        error: (error: any) => {
+          console.error('Error loading time to complete chart', error);
+        }
+      });
+    
+    // Load device breakdown chart
+    this.analyticsService.getDeviceBreakdown(this.selectedTimeRange)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data: ChartData<keyof ChartTypeRegistry, (number | [number, number] | Point | BubbleDataPoint | null)[], unknown> | null) => {
+          this.deviceBreakdownData = data;
+        },
+        error: (error: any) => {
+          console.error('Error loading device breakdown chart', error);
+        }
+      });
+    
+    // Load user demographics chart
+    this.analyticsService.getUserDemographics(this.selectedTimeRange)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data: ChartData<keyof ChartTypeRegistry, (number | [number, number] | Point | BubbleDataPoint | null)[], unknown> | null) => {
+          this.userDemographicsData = data;
+        },
+        error: (error: any) => {
+          console.error('Error loading user demographics chart', error);
+        },
+        complete: () => {
+          this.isLoading = false;
+        }
+      });
+  }
+  
+  onTimeRangeChange(event: Event): void {
+    const selectElement = event.target as HTMLSelectElement;
+    this.selectedTimeRange = selectElement.value as unknown as TimeRange;
+    this.loadDashboardData();
+  }
+  
+  refreshData(): void {
+    this.loadDashboardData();
+  }
+  
+  formatTime(minutes: number): string {
+    if (minutes < 60) {
+      return `${Math.round(minutes)} min`;
     } else {
-      this.router.navigate(['/surveys']);
+      const hours = Math.floor(minutes / 60);
+      const remainingMinutes = Math.round(minutes % 60);
+      return `${hours} h ${remainingMinutes} min`;
     }
   }
-
-  formatTime(seconds: number): string {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = Math.floor(seconds % 60);
-    return `${minutes}m ${remainingSeconds}s`;
-  }
-
-  getRatingClass(rating: number): string {
-    if (rating >= 4) return 'rating-high';
-    if (rating >= 3) return 'rating-medium';
-    return 'rating-low';
-  }
-
-  // Méthodes pour les graphiques de questions
-  getPieData(question: any): number[] {
-    return question.optionCounts?.map((option: any) => option.count) || [];
-  }
-
-  getPieLabels(question: any): string[] {
-    return question.optionCounts?.map((option: any) => option.optionText) || [];
-  }
-
-  getBarData(question: any): any[] {
-    return [
-      {
-        data: question.optionCounts?.map((option: any) => option.count) || [],
-        backgroundColor: '#3F51B5',
-      },
-    ];
-  }
-
-  getBarLabels(question: any): string[] {
-    return question.optionCounts?.map((option: any) => option.optionText) || [];
-  }
-
-  getWordSize(frequency: number): number {
-    // Taille de police basée sur la fréquence du mot
-    const minSize = 12;
-    const maxSize = 24;
-    const maxFrequency = 50; // Valeur arbitraire pour la démonstration
-
-    return Math.max(
-      minSize,
-      Math.min(
-        maxSize,
-        minSize + (frequency / maxFrequency) * (maxSize - minSize)
-      )
-    );
-  }
-
-  private loadSurveyAnalytics(): void {
-    this.isLoading = true;
-
-    // Obtenir les détails de l'enquête sélectionnée
-    this.surveyService.getSurveyById(this.selectedSurveyId).subscribe(
-      (survey) => {
-        this.currentSurvey = survey;
-
-        // Obtenir les analyses pour cette enquête
-        this.analyticsService
-          .getSurveyAnalytics(this.selectedSurveyId, this.selectedPeriod)
-          .subscribe(
-            (data) => {
-              this.analytics = data;
-
-              // Mettre à jour les données du graphique en barre
-              if (data.questions && data.questions.length > 0) {
-                const ratingQuestion = data.questions.find(
-                  (q: any) => q.type === 'rating'
-                );
-                if (ratingQuestion && ratingQuestion.ratingDistribution) {
-                  this.barChartData = [
-                    {
-                      data: ratingQuestion.ratingDistribution.map(
-                        (r: any) => r.percentage
-                      ),
-                      backgroundColor: '#FF4081',
-                    },
-                  ];
-                }
-              }
-
-              // Obtenir les réponses récentes
-              this.analyticsService
-                .getRecentResponses(this.selectedSurveyId)
-                .subscribe(
-                  (responses) => {
-                    this.recentResponses = responses;
-                    this.isLoading = false;
-                  },
-                  (error) => {
-                    console.error('Error fetching recent responses', error);
-                    this.recentResponses = [];
-                    this.isLoading = false;
-                  }
-                );
-            },
-            (error) => {
-              this.notificationService.error(
-                'Erreur lors du chargement des analyses'
-              );
-              console.error(error);
-              this.isLoading = false;
-            }
-          );
-      },
-      (error) => {
-        this.notificationService.error(
-          "Erreur lors du chargement des détails de l'enquête"
-        );
-        console.error(error);
-        this.isLoading = false;
-      }
-    );
-  }
-
-  private loadGeneralAnalytics(): void {
-    this.isLoading = true;
-
-    this.analyticsService.getDashboardStats().subscribe(
-      (data) => {
-        // Pour la démonstration, utilisons un format simplifié
-        this.analytics = {
-          totalResponses: data.totalResponses,
-          completionRate: data.averageCompletionRate,
-          averageRating: 4.0, // Valeur fictive
-          averageTime: 180, // Valeur fictive
-          questions: [], // Pas de questions spécifiques pour les statistiques générales
-        };
-
-        this.currentSurvey = null;
-        this.recentResponses = []; // Pas de réponses récentes pour les statistiques générales
-        this.isLoading = false;
-      },
-      (error) => {
-        this.notificationService.error(
-          'Erreur lors du chargement des statistiques générales'
-        );
-        console.error(error);
-        this.isLoading = false;
-      }
-    );
+  
+  formatPercentage(value: number): string {
+    return `${Math.round(value)}%`;
   }
 }

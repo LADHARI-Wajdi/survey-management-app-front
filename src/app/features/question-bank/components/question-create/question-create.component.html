@@ -1,1 +1,204 @@
-<p>question-create works!</p>
+<!-- features/question-bank/components/question-create/question-create.component.html -->
+<div class="question-form-container">
+    <h2 class="form-title">{{ isEditMode ? 'Modifier la question' : 'Créer une nouvelle question' }}</h2>
+  
+    <form [formGroup]="questionForm" (ngSubmit)="onSubmit()">
+      <mat-card class="form-card">
+        <mat-card-content>
+          <!-- Informations principales -->
+          <div class="form-section">
+            <h3 class="section-title">Informations principales</h3>
+            
+            <!-- Titre de la question -->
+            <mat-form-field class="full-width" appearance="outline">
+              <mat-label>Titre de la question</mat-label>
+              <input matInput formControlName="title" placeholder="Saisissez le titre de votre question">
+              <mat-error *ngIf="questionForm.get('title')?.hasError('required')">
+                Le titre est obligatoire
+              </mat-error>
+              <mat-error *ngIf="questionForm.get('title')?.hasError('minlength')">
+                Le titre doit contenir au moins 5 caractères
+              </mat-error>
+            </mat-form-field>
+            
+            <!-- Description de la question -->
+            <mat-form-field class="full-width" appearance="outline">
+              <mat-label>Description (optionnelle)</mat-label>
+              <textarea matInput formControlName="description" placeholder="Ajoutez des instructions ou détails supplémentaires"></textarea>
+            </mat-form-field>
+            
+            <!-- Type de question -->
+            <mat-form-field class="full-width" appearance="outline">
+              <mat-label>Type de question</mat-label>
+              <mat-select formControlName="type" (selectionChange)="onTypeChange()">
+                <mat-option *ngFor="let type of questionTypes" [value]="type">
+                  {{ getQuestionTypeLabel(type) }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            
+            <!-- Question obligatoire -->
+            <div class="checkbox-field">
+              <mat-checkbox formControlName="isRequired">Question obligatoire</mat-checkbox>
+            </div>
+          </div>
+          
+          <!-- Options (pour les questions à choix) -->
+          <div class="form-section" *ngIf="hasOptions(selectedType)">
+            <h3 class="section-title">Options de réponse</h3>
+            
+            <div formArrayName="options">
+              <div *ngFor="let option of options.controls; let i = index" [formGroupName]="i" class="option-item">
+                <mat-form-field class="option-text" appearance="outline">
+                  <mat-label>Option {{ i + 1 }}</mat-label>
+                  <input matInput formControlName="text" placeholder="Texte de l'option">
+                  <mat-error *ngIf="option.get('text')?.hasError('required')">
+                    Le texte de l'option est obligatoire
+                  </mat-error>
+                </mat-form-field>
+                
+                <mat-form-field class="option-value" appearance="outline">
+                  <mat-label>Valeur</mat-label>
+                  <input matInput formControlName="value" placeholder="Valeur stockée">
+                </mat-form-field>
+                
+                <button type="button" mat-icon-button color="warn" 
+                        aria-label="Supprimer cette option" 
+                        (click)="removeOption(i)"
+                        [disabled]="options.length <= 2"
+                        matTooltip="Supprimer l'option">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+              
+              <!-- Bouton pour ajouter une option -->
+              <div class="add-option-btn">
+                <button type="button" mat-stroked-button color="primary" (click)="addOption()">
+                  <mat-icon>add</mat-icon> Ajouter une option
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Paramètres spécifiques au type de question -->
+          <div class="form-section" formGroupName="settings">
+            <h3 class="section-title">Paramètres avancés</h3>
+            
+            <!-- Paramètres pour les questions texte -->
+            <ng-container *ngIf="selectedType === 'text_short' || selectedType === 'text_long'">
+              <mat-form-field class="full-width" appearance="outline">
+                <mat-label>Texte d'aide (placeholder)</mat-label>
+                <input matInput formControlName="placeholder" placeholder="Ex: Votre réponse ici...">
+              </mat-form-field>
+              
+              <mat-form-field *ngIf="selectedType === 'text_long'" class="medium-width" appearance="outline">
+                <mat-label>Nombre de lignes</mat-label>
+                <input matInput type="number" formControlName="rows" min="2" max="20">
+              </mat-form-field>
+            </ng-container>
+            
+            <!-- Paramètres pour les questions numériques -->
+            <ng-container *ngIf="selectedType === 'numeric'">
+              <div class="input-row">
+                <mat-form-field class="medium-width" appearance="outline">
+                  <mat-label>Valeur minimale</mat-label>
+                  <input matInput type="number" formControlName="minValue">
+                </mat-form-field>
+                
+                <mat-form-field class="medium-width" appearance="outline">
+                  <mat-label>Valeur maximale</mat-label>
+                  <input matInput type="number" formControlName="maxValue">
+                </mat-form-field>
+                
+                <mat-form-field class="medium-width" appearance="outline">
+                  <mat-label>Pas</mat-label>
+                  <input matInput type="number" formControlName="step" min="0.01">
+                </mat-form-field>
+              </div>
+            </ng-container>
+            
+            <!-- Paramètres pour les questions d'évaluation -->
+            <ng-container *ngIf="selectedType === 'rating'">
+              <div class="input-row">
+                <mat-form-field class="medium-width" appearance="outline">
+                  <mat-label>Note minimale</mat-label>
+                  <input matInput type="number" formControlName="minValue" min="0" max="10">
+                </mat-form-field>
+                
+                <mat-form-field class="medium-width" appearance="outline">
+                  <mat-label>Note maximale</mat-label>
+                  <input matInput type="number" formControlName="maxValue" min="1" max="10">
+                </mat-form-field>
+              </div>
+              
+              <mat-form-field class="medium-width" appearance="outline">
+                <mat-label>Symbole d'évaluation</mat-label>
+                <mat-select formControlName="ratingSymbol">
+                  <mat-option value="star">Étoiles</mat-option>
+                  <mat-option value="number">Chiffres</mat-option>
+                  <mat-option value="emoji">Emojis</mat-option>
+                </mat-select>
+              </mat-form-field>
+              
+              <div class="checkbox-field">
+                <mat-checkbox formControlName="includeNotApplicable">Inclure l'option "Non applicable"</mat-checkbox>
+              </div>
+            </ng-container>
+            
+            <!-- Paramètres pour les questions à choix -->
+            <ng-container *ngIf="hasOptions(selectedType)">
+              <mat-form-field class="medium-width" appearance="outline">
+                <mat-label>Disposition des options</mat-label>
+                <mat-select formControlName="layout">
+                  <mat-option value="vertical">Verticale</mat-option>
+                  <mat-option value="horizontal">Horizontale</mat-option>
+                  <mat-option value="grid">Grille</mat-option>
+                </mat-select>
+              </mat-form-field>
+              
+              <div class="checkbox-field">
+                <mat-checkbox formControlName="shuffleOptions">Afficher les options dans un ordre aléatoire</mat-checkbox>
+              </div>
+            </ng-container>
+            
+            <!-- Paramètres pour les questions de type fichier -->
+            <ng-container *ngIf="selectedType === 'file'">
+              <div class="checkbox-field">
+                <mat-checkbox formControlName="allowMultipleFiles">Autoriser plusieurs fichiers</mat-checkbox>
+              </div>
+              
+              <mat-form-field class="medium-width" appearance="outline">
+                <mat-label>Taille maximale (en Mo)</mat-label>
+                <input matInput type="number" formControlName="maxFileSize" min="1" max="50">
+              </mat-form-field>
+              
+              <mat-form-field class="full-width" appearance="outline">
+                <mat-label>Types de fichiers acceptés</mat-label>
+                <mat-select formControlName="acceptedFileTypes" multiple>
+                  <mat-option value="image/*">Images</mat-option>
+                  <mat-option value="application/pdf">PDF</mat-option>
+                  <mat-option value="application/msword">Documents Word</mat-option>
+                  <mat-option value="application/vnd.ms-excel">Documents Excel</mat-option>
+                  <mat-option value="text/plain">Fichiers texte</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </ng-container>
+          </div>
+        </mat-card-content>
+        
+        <mat-divider></mat-divider>
+        
+        <mat-card-actions align="end">
+          <button type="button" mat-button color="basic" (click)="onCancel()">Annuler</button>
+          <button type="submit" mat-raised-button color="primary" [disabled]="questionForm.invalid || isSubmitting">
+            <span *ngIf="isSubmitting">
+              <mat-icon>hourglass_empty</mat-icon> Traitement...
+            </span>
+            <span *ngIf="!isSubmitting">
+              {{ isEditMode ? 'Mettre à jour' : 'Créer' }}
+            </span>
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </form>
+  </div>

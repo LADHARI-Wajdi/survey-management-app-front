@@ -1,22 +1,40 @@
-import { Component, OnInit, ElementRef } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+// features/distribution/components/distribution-methods/distribution-methods.component.ts
+import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  ReactiveFormsModule,
+} from '@angular/forms';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 import { DistributionService } from '../../services/distribution.service';
 import { InvitationService } from '../../services/invitation.service';
 import { SurveyService } from '../../../survey-management/services/survey.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { Survey } from '../../../../core/models/survey.model';
+import {
+  DistributionStatistics,
+  DistributionMethod,
+} from '../../models/distribution.model';
 
 @Component({
   selector: 'app-distribution-methods',
   templateUrl: './distribution-methods.component.html',
   styleUrls: ['./distribution-methods.component.scss'],
+  standalone: true,
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule],
 })
 export class DistributionMethodsComponent implements OnInit {
+  // Tab management
   activeTab: string = 'email';
+
+  // Survey information
   currentSurvey: Survey | null = null;
+  surveyId: string = '';
 
   // Email tab
   emailForm: FormGroup;
@@ -38,15 +56,25 @@ export class DistributionMethodsComponent implements OnInit {
   iframeHeight: number = 450;
   iframeCodeText: string = '';
 
+  // Distribution statistics
+  distributionStats: DistributionStatistics | null = null;
+  isLoading: boolean = true;
+
+  // ViewChild references
+  @ViewChild('linkInput') linkInput!: ElementRef;
+  @ViewChild('iframeCode') iframeCode!: ElementRef;
+
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
+    private router: Router,
     private distributionService: DistributionService,
     private invitationService: InvitationService,
     private surveyService: SurveyService,
     private notificationService: NotificationService,
     private sanitizer: DomSanitizer
   ) {
+    // Initialize email form
     this.emailForm = this.fb.group({
       recipients: ['', Validators.required],
       subject: ['Invitation à participer à notre enquête', Validators.required],
@@ -56,33 +84,115 @@ export class DistributionMethodsComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Récupérer l'ID de l'enquête depuis l'URL
+    // Get survey ID from URL
     this.route.params.subscribe((params) => {
       if (params['id']) {
-        this.loadSurvey(params['id']);
+        this.surveyId = params['id'];
+        this.loadSurvey(this.surveyId);
+      } else {
+        this.notificationService.error("ID d'enquête manquant");
+        this.router.navigate(['/surveys']);
       }
     });
   }
 
+  /**
+   * Load survey details
+   */
+  loadSurvey(id: string): void {
+    this.isLoading = true;
+    this.surveyService.getSurveyById(id).subscribe(
+      (survey) => {
+        this.currentSurvey = survey;
+
+        // Initialize tab data
+        this.generateSurveyLink();
+        this.loadInvitationStats();
+        this.loadDistributionStats();
+
+        // Update the email subject with survey title
+        this.emailForm.patchValue({
+          subject: `Invitation à participer à l'enquête: ${survey.title}`,
+        });
+
+        this.isLoading = false;
+      },
+      (error) => {
+        console.error('Error loading survey', error);
+        this.notificationService.error(
+          "Erreur lors du chargement des détails de l'enquête"
+        );
+        this.isLoading = false;
+        this.router.navigate(['/surveys']);
+      }
+    );
+  }
+
+  /**
+   * Set active tab and initialize tab-specific data
+   */
   setActiveTab(tab: string): void {
     this.activeTab = tab;
 
-    // Initialiser les données spécifiques à l'onglet
+    // Initialize tab-specific data
     switch (tab) {
       case 'qrcode':
-        this.generateQrCode();
+        if (!this.qrCodeDataUrl) {
+          this.generateQrCode();
+        }
         break;
       case 'link':
-        this.generateSurveyLink();
+        if (!this.surveyLink) {
+          this.generateSurveyLink();
+        }
         break;
       case 'iframe':
-        this.generateIframeCode();
+        if (!this.iframeCodeText) {
+          this.generateIframeCode();
+        }
         break;
     }
   }
 
-  // Méthodes pour l'onglet Email
+  /**
+   * Load invitation statistics
+   */
+  loadInvitationStats(): void {
+    this.invitationService.getInvitationStatistics(this.surveyId).subscribe(
+      (stats) => {
+        this.invitationStats = {
+          sentCount: stats.sentCount || 0,
+          openCount: stats.openCount || 0,
+          openRate: stats.openRate || 0,
+        };
+      },
+      (error) => {
+        console.error('Error loading invitation statistics', error);
+      }
+    );
+  }
 
+  /**
+   * Load distribution statistics
+   */
+  loadDistributionStats(): void {
+    this.distributionService.getDistributionStats(this.surveyId).subscribe(
+      (stats) => {
+        this.distributionStats = stats;
+      },
+      (error) => {
+        console.error('Error loading distribution statistics', error);
+      }
+    );
+  }
+
+  //
+  // Email Tab Methods
+  //
+
+  /**
+   * Handle template selection change
+   */
   onTemplateChange(): void {
     if (this.emailForm.get('template')?.value === 'custom') {
       const defaultMessage = `Bonjour,\n\nVous êtes invité(e) à participer à notre enquête "${this.currentSurvey?.title}".\n\nMerci de prendre quelques minutes pour y répondre.\n\nCordialement,\nL'équipe ${this.currentSurvey?.createdBy}`;
@@ -90,6 +200,9 @@ export class DistributionMethodsComponent implements OnInit {
     }
   }
 
+  /**
+   * Generate HTML preview of the email template
+   */
   getTemplatePreview(): SafeHtml {
     const template = this.emailForm.get('template')?.value;
     let content = '';
@@ -97,28 +210,28 @@ export class DistributionMethodsComponent implements OnInit {
     switch (template) {
       case 'standard':
         content = `<p>Bonjour,</p>
-                  <p>Vous êtes invité(e) à participer à notre enquête "${this.currentSurvey?.title}".</p>
-                  <p>Merci de prendre quelques minutes pour y répondre.</p>
-                  <p>Cordialement,<br>L'équipe Survey Management</p>`;
+                   <p>Vous êtes invité(e) à participer à notre enquête "${this.currentSurvey?.title}".</p>
+                   <p>Merci de prendre quelques minutes pour y répondre.</p>
+                   <p>Cordialement,<br>L'équipe Survey Management</p>`;
         break;
       case 'formal':
         content = `<p>Madame, Monsieur,</p>
-                  <p>Nous vous invitons à participer à notre enquête intitulée "${this.currentSurvey?.title}".</p>
-                  <p>Votre contribution est essentielle pour nous aider à améliorer nos services.</p>
-                  <p>Nous vous remercions par avance pour votre participation.</p>
-                  <p>Veuillez agréer nos salutations distinguées,<br>L'équipe Survey Management</p>`;
+                   <p>Nous vous invitons à participer à notre enquête intitulée "${this.currentSurvey?.title}".</p>
+                   <p>Votre contribution est essentielle pour nous aider à améliorer nos services.</p>
+                   <p>Nous vous remercions par avance pour votre participation.</p>
+                   <p>Veuillez agréer nos salutations distinguées,<br>L'équipe Survey Management</p>`;
         break;
       case 'friendly':
         content = `<p>Salut !</p>
-                  <p>On aimerait avoir ton avis sur "${this.currentSurvey?.title}" !</p>
-                  <p>Ça ne prendra que quelques minutes et ton retour est vraiment important pour nous.</p>
-                  <p>Merci d'avance !<br>L'équipe Survey Management</p>`;
+                   <p>On aimerait avoir ton avis sur "${this.currentSurvey?.title}" !</p>
+                   <p>Ça ne prendra que quelques minutes et ton retour est vraiment important pour nous.</p>
+                   <p>Merci d'avance !<br>L'équipe Survey Management</p>`;
         break;
       case 'reminder':
         content = `<p>Bonjour,</p>
-                  <p>Nous vous rappelons que vous êtes invité(e) à participer à notre enquête "${this.currentSurvey?.title}".</p>
-                  <p>Votre avis compte beaucoup pour nous et il ne vous faudra que quelques minutes pour répondre.</p>
-                  <p>Merci pour votre participation,<br>L'équipe Survey Management</p>`;
+                   <p>Nous vous rappelons que vous êtes invité(e) à participer à notre enquête "${this.currentSurvey?.title}".</p>
+                   <p>Votre avis compte beaucoup pour nous et il ne vous faudra que quelques minutes pour répondre.</p>
+                   <p>Merci pour votre participation,<br>L'équipe Survey Management</p>`;
         break;
       case 'custom':
         const customMessage = this.emailForm.get('customMessage')?.value || '';
@@ -126,7 +239,7 @@ export class DistributionMethodsComponent implements OnInit {
         break;
     }
 
-    // Ajouter le bouton
+    // Add button
     content += `<p style="text-align: center; margin-top: 20px;">
                 <a href="${this.surveyLink}" style="background-color: #3F51B5; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">
                   Répondre à l'enquête
@@ -136,11 +249,17 @@ export class DistributionMethodsComponent implements OnInit {
     return this.sanitizer.bypassSecurityTrustHtml(content);
   }
 
+  /**
+   * Show email preview
+   */
   previewEmail(): void {
-    // Cette méthode ouvrirait normalement une modal avec un aperçu complet de l'email
+    // In a real app, this would open a modal with a complete preview
     this.notificationService.info("Fonction d'aperçu à implémenter");
   }
 
+  /**
+   * Send email invitations
+   */
   sendInvitations(): void {
     if (this.emailForm.invalid) {
       this.notificationService.error(
@@ -155,7 +274,7 @@ export class DistributionMethodsComponent implements OnInit {
       .map((email: string) => email.trim());
 
     const invitationData = {
-      surveyId: this.currentSurvey?.id,
+      surveyId: this.surveyId,
       subject: formValue.subject,
       template: formValue.template,
       customMessage: formValue.customMessage,
@@ -163,7 +282,7 @@ export class DistributionMethodsComponent implements OnInit {
     };
 
     this.invitationService
-      .sendInvitations(this.currentSurvey?.id || '', invitationData)
+      .sendInvitations(this.surveyId, invitationData)
       .subscribe(
         (response) => {
           this.notificationService.success(
@@ -180,12 +299,17 @@ export class DistributionMethodsComponent implements OnInit {
       );
   }
 
-  // Méthodes pour l'onglet QR Code
+  //
+  // QR Code Tab Methods
+  //
 
+  /**
+   * Generate QR code
+   */
   generateQrCode(): void {
-    if (!this.currentSurvey) return;
+    if (!this.surveyId) return;
 
-    this.distributionService.generateQrCode(this.currentSurvey.id).subscribe(
+    this.distributionService.generateQrCode(this.surveyId).subscribe(
       (dataUrl) => {
         this.qrCodeDataUrl = dataUrl;
       },
@@ -198,6 +322,9 @@ export class DistributionMethodsComponent implements OnInit {
     );
   }
 
+  /**
+   * Download QR code
+   */
   downloadQrCode(): void {
     if (!this.qrCodeDataUrl) return;
 
@@ -209,6 +336,9 @@ export class DistributionMethodsComponent implements OnInit {
     document.body.removeChild(a);
   }
 
+  /**
+   * Print QR code
+   */
   printQrCode(): void {
     if (!this.qrCodeDataUrl) return;
 
@@ -235,13 +365,18 @@ export class DistributionMethodsComponent implements OnInit {
     }
   }
 
-  // Méthodes pour l'onglet Lien
+  //
+  // Link Tab Methods
+  //
 
+  /**
+   * Generate survey link
+   */
   generateSurveyLink(): void {
-    if (!this.currentSurvey) return;
+    if (!this.surveyId) return;
 
     this.distributionService
-      .generateSurveyLink(this.currentSurvey.id, this.expirationDate)
+      .generateSurveyLink(this.surveyId, this.expirationDate)
       .subscribe(
         (link) => {
           this.surveyLink = link;
@@ -255,16 +390,25 @@ export class DistributionMethodsComponent implements OnInit {
       );
   }
 
+  /**
+   * Copy link to clipboard
+   */
   copyLink(input: HTMLInputElement): void {
     input.select();
     document.execCommand('copy');
     this.notificationService.success('Lien copié dans le presse-papier');
   }
 
+  /**
+   * Update link with new expiration date
+   */
   updateLink(): void {
     this.generateSurveyLink();
   }
 
+  /**
+   * Share survey on social media
+   */
   shareOnSocial(platform: string): void {
     if (!this.surveyLink) return;
 
@@ -292,12 +436,17 @@ export class DistributionMethodsComponent implements OnInit {
     window.open(url, '_blank');
   }
 
-  // Méthodes pour l'onglet iFrame
+  //
+  // iFrame Tab Methods
+  //
 
+  /**
+   * Generate iframe embed code
+   */
   generateIframeCode(): void {
-    if (!this.currentSurvey) return;
+    if (!this.surveyId) return;
 
-    this.distributionService.getEmbedCode(this.currentSurvey.id).subscribe(
+    this.distributionService.getEmbedCode(this.surveyId).subscribe(
       (baseUrl) => {
         this.iframeCodeText = `<iframe src="${baseUrl}" width="${this.iframeWidth}" height="${this.iframeHeight}" frameborder="0" allowfullscreen></iframe>`;
       },
@@ -310,50 +459,14 @@ export class DistributionMethodsComponent implements OnInit {
     );
   }
 
+  /**
+   * Copy iframe code to clipboard
+   */
   copyIframeCode(textarea: HTMLTextAreaElement): void {
     textarea.select();
     document.execCommand('copy');
     this.notificationService.success(
       "Code d'intégration copié dans le presse-papier"
     );
-  }
-
-  // Méthodes communes
-
-  private loadSurvey(id: string): void {
-    this.surveyService.getSurveyById(id).subscribe(
-      (survey) => {
-        this.currentSurvey = survey;
-
-        // Initialiser tous les onglets
-        this.generateSurveyLink();
-        this.loadInvitationStats();
-      },
-      (error) => {
-        this.notificationService.error(
-          "Erreur lors du chargement des détails de l'enquête"
-        );
-        console.error(error);
-      }
-    );
-  }
-
-  private loadInvitationStats(): void {
-    if (!this.currentSurvey) return;
-
-    this.invitationService
-      .getInvitationStatistics(this.currentSurvey.id)
-      .subscribe(
-        (stats) => {
-          this.invitationStats = {
-            sentCount: stats.sentCount || 0,
-            openCount: stats.openCount || 0,
-            openRate: stats.openRate || 0,
-          };
-        },
-        (error) => {
-          console.error('Error loading invitation statistics', error);
-        }
-      );
   }
 }

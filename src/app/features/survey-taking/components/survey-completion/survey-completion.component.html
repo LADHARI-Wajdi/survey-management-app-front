@@ -1,1 +1,41 @@
-<p>survey-completion works!</p>
+<!-- src/app/features/survey-taking/components/survey-completion/survey-completion.component.html -->
+<div class="survey-completion">
+    <div class="completion-card">
+      <div class="success-icon">
+        <i class="material-icons">check_circle</i>
+      </div>
+      
+      <h1 class="completion-title">Enquête complétée!</h1>
+      
+      <div class="thank-you-message">
+        {{ thankYouMessage }}
+      </div>
+      
+      <div class="completion-details">
+        <div *ngIf="survey">
+          <p class="survey-name">{{ survey.title }}</p>
+        </div>
+        <p class="completion-date">Complétée le {{ currentDate | date:'dd/MM/yyyy à HH:mm' }}</p>
+      </div>
+      
+      <div class="action-buttons">
+        <button class="btn btn-primary btn-home" (click)="goToHome()">
+          <i class="material-icons">home</i>
+          Accueil
+        </button>
+        
+        <button class="btn btn-outline btn-surveys" (click)="goToSurveys()">
+          <i class="material-icons">list</i>
+          Voir d'autres enquêtes
+        </button>
+      </div>
+      
+      <div class="share-section">
+        <p>Partagez cette enquête avec d'autres personnes</p>
+        <button class="btn btn-share" (click)="shareSurvey()">
+          <i class="material-icons">share</i>
+          Partager
+        </button>
+      </div>
+    </div>
+  </div>

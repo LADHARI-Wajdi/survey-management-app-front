@@ -1,4 +1,4 @@
-export const environment = {
-    production: true,
-    apiUrl: 'https://api.votre-domaine.com/api'
-  };
+export const environement = {
+  production: true,
+  apiUrl: 'https://api.survey-management-app.com/api'
+};

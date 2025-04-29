@@ -1,8 +1,3 @@
-import { CanActivateFn } from '@angular/router';
-
-export const surveyAccessGuard: CanActivateFn = (route, state) => {
-  return true;
-};
 // core/guards/survey-access.guard.ts
 import { Injectable } from '@angular/core';
 import {
@@ -15,6 +10,7 @@ import { Observable } from 'rxjs';
 import { map, switchMap, take } from 'rxjs/operators';
 import { AuthService } from '../authentication/services/auth.service';
 import { SurveyService } from '../../features/survey-management/services/survey.service';
+import { UserRole } from '../authentication/models/user.model';
 
 @Injectable({
   providedIn: 'root',
@@ -30,7 +26,7 @@ export class SurveyAccessGuard implements CanActivate {
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
   ): Observable<boolean> {
-    const surveyId = route.params.id;
+    const surveyId = route.params['id'];
 
     if (!surveyId) {
       this.router.navigate(['/surveys']);
@@ -45,24 +41,25 @@ export class SurveyAccessGuard implements CanActivate {
           return new Observable<boolean>((observer) => observer.next(false));
         }
 
-        // If the user is an admin, always grant access
-        if (user.roles.includes('admin')) {
+        // Si l'utilisateur est un admin, toujours autoriser l'accès
+        // Vérifier si user.roles existe et convertir la string en UserRole
+        if (user.roles && user.roles.some(role => role === UserRole.ADMIN.toString() || role === UserRole.ADMIN)) {
           return new Observable<boolean>((observer) => observer.next(true));
         }
 
-        // Check if the user has access to this specific survey
+        // Vérifier si l'utilisateur a accès à cette enquête spécifique
         return this.surveyService.getSurveyById(surveyId).pipe(
           map((survey) => {
-            // Check if the user created the survey
+            // Vérifier si l'utilisateur a créé l'enquête
             if (survey.createdBy === user.id) {
               return true;
             }
 
-            // Check if user has collaborator role for this survey
-            // This would require additional logic with a real service
-            // that checks user permissions for the survey
+            // Vérifier si l'utilisateur a un rôle de collaborateur pour cette enquête
+            // Cela nécessiterait une logique supplémentaire avec un service réel
+            // qui vérifie les autorisations de l'utilisateur pour l'enquête
 
-            // If not authorized to access this survey
+            // Si non autorisé à accéder à cette enquête
             this.router.navigate(['/surveys']);
             return false;
           })

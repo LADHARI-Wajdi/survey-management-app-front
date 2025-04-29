@@ -1,7 +1,13 @@
 // core/authentication/forgot-password/forgot-password.component.ts
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  ReactiveFormsModule,
+} from '@angular/forms';
+import { Router, RouterModule } from '@angular/router';
+import { CommonModule } from '@angular/common';
 import { AuthService } from '../services/auth.service';
 import { NotificationService } from '../../services/notification.service';
 
@@ -9,38 +15,39 @@ import { NotificationService } from '../../services/notification.service';
   selector: 'app-forgot-password',
   templateUrl: './forgot-password.component.html',
   styleUrls: ['./forgot-password.component.scss'],
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, RouterModule],
 })
 export class ForgotPasswordComponent implements OnInit {
-  forgotpasswordForm: FormGroup = new FormGroup({});
+  forgotPasswordForm!: FormGroup;
   loading = false;
   submitted = false;
   emailSent = false;
   error = '';
-  forgotPasswordForm: any;
 
   constructor(
-    private formBuilder: FormBuilder,
+    private fb: FormBuilder,
     private router: Router,
     private authService: AuthService,
     private notificationService: NotificationService
   ) {}
 
   ngOnInit() {
-    this.forgotPasswordForm = this.formBuilder.group({
+    this.forgotPasswordForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
     });
   }
 
   // convenience getter for easy access to form fields
   get f() {
-    return this.forgotPasswordForm!.controls;
+    return this.forgotPasswordForm.controls;
   }
 
   onSubmit() {
     this.submitted = true;
 
     // stop here if form is invalid
-    if (this.forgotPasswordForm!.invalid) {
+    if (this.forgotPasswordForm.invalid) {
       return;
     }
 
@@ -52,7 +59,7 @@ export class ForgotPasswordComponent implements OnInit {
           'Un email contenant les instructions pour réinitialiser votre mot de passe a été envoyé à votre adresse email.'
         );
       },
-      (error) => {
+      (error: { message: string; }) => {
         this.error =
           error.message ||
           'Une erreur est survenue. Veuillez réessayer plus tard.';

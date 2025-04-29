@@ -1,0 +1,68 @@
+<!-- src/app/features/participant-dashboard/components/participant-dashboard/participant-dashboard.component.html -->
+<div class="participant-dashboard">
+  <div class="dashboard-header">
+    <h1 class="dashboard-title">Tableau de bord</h1>
+  </div>
+
+  <!-- Statistiques principales -->
+  <div class="stats-container">
+    <div class="loading-indicator" *ngIf="isLoading">
+      <div class="spinner"></div>
+      <p>Chargement des statistiques...</p>
+    </div>
+
+    <div class="stats-grid" *ngIf="!isLoading">
+      <div class="stat-card">
+        <div class="stat-icon available-icon">
+          <i class="fas fa-clipboard-list"></i>
+        </div>
+        <div class="stat-content">
+          <div class="stat-value">{{ dashboardStats.availableSurveys }}</div>
+          <div class="stat-label">Enquêtes disponibles</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon completed-icon">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="stat-content">
+          <div class="stat-value">{{ dashboardStats.completedSurveys }}</div>
+          <div class="stat-label">Enquêtes complétées</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon responses-icon">
+          <i class="fas fa-reply-all"></i>
+        </div>
+        <div class="stat-content">
+          <div class="stat-value">{{ dashboardStats.totalResponses }}</div>
+          <div class="stat-label">Réponses totales</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon time-icon">
+          <i class="fas fa-stopwatch"></i>
+        </div>
+        <div class="stat-content">
+          <div class="stat-value">{{ formatAvgTime(dashboardStats.avgCompletionTime) }}</div>
+          <div class="stat-label">Temps moyen</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation des onglets -->
+  <div class="dashboard-tabs">
+    <a routerLink="available" routerLinkActive="active" class="tab-link">
+      <i class="fas fa-clipboard-list"></i> Enquêtes disponibles
+    </a>
+    <a routerLink="completed" routerLinkActive="active" class="tab-link">
+      <i class="fas fa-check-circle"></i> Enquêtes complétées
+    </a>
+  </div>
+
+
+</div>

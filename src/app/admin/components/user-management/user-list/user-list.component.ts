@@ -1,5 +1,6 @@
+// src/app/admin/components/user-management/user-list/user-list.component.ts
 import { Component, OnInit } from '@angular/core';
-import { MatDialog, MatDialogActions } from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -7,27 +8,26 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { UserManagementService } from '../services/user-management.service';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { UserProfileModel, UserRole } from '../models/user-profile.model';
-import { UserManagementModule } from '../user-management.module';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { UserEditComponent } from '../user-edit/user-edit.component';
+import { User, UserRole} from '../../../../core/authentication/models/user.model';
+
 @Component({
   selector: 'app-user-list',
   templateUrl: './user-list.component.html',
   styleUrls: ['./user-list.component.scss'],
+  standalone: true,
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    MatDialogActions,
     MatButtonModule,
     MatCardModule,
     MatSnackBarModule,
-    MatButtonModule,
-    MatSnackBarModule,
-
-  ],
+    MatProgressSpinnerModule
+  ]
 })
 export class UserListComponent implements OnInit {
-  users: UserProfileModel[] = [];
+  users: User[] = [];
   displayedColumns: string[] = [
     'username',
     'email',
@@ -51,10 +51,7 @@ export class UserListComponent implements OnInit {
   loadUsers(): void {
     this.isLoading = true;
     this.userService.getAllUsers().subscribe({
-      next: (data) => {
-        this.users = data;
-        this.isLoading = false;
-      },
+
       error: (error) => {
         console.error('Error loading users', error);
         this.snackBar.open(
@@ -70,7 +67,7 @@ export class UserListComponent implements OnInit {
   }
 
   openAddUserDialog(): void {
-    const dialogRef = this.dialog.open(UserManagementModule, {
+    const dialogRef = this.dialog.open(UserEditComponent, {
       width: '400px',
       data: { user: null },
     });
@@ -82,15 +79,15 @@ export class UserListComponent implements OnInit {
     });
   }
 
-  editUser(user: UserProfileModel): void {
+  editUser(user: User): void {
     this.router.navigate(['/admin/users/edit', user.id]);
   }
 
-  viewUserDetails(user: UserProfileModel): void {
+  viewUserDetails(user: User): void {
     this.router.navigate(['/admin/users/detail', user.id]);
   }
 
-  deleteUser(user: UserProfileModel): void {
+  deleteUser(user: User): void {
     if (
       confirm(
         `Êtes-vous sûr de vouloir supprimer l'utilisateur ${user.username}?`

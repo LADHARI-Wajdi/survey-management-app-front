@@ -1,12 +1,17 @@
-// src/app/core/models/user.model.ts
+export enum UserRole {
+  ADMIN = 'admin',
+  INVESTIGATOR = 'investigator',
+  PARTICIPANT = 'participant'
+}
+
 export interface User {
-    id: string;
-    username: string;
-    email: string;
-    firstName?: string;
-    lastName?: string;
-    roles: string[];
-    profilePicture?: string;
-    createdAt: Date;
-    updatedAt: Date;
-  }
+  id: string;
+  username: string;
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  roles: UserRole[];
+  profilePicture?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}

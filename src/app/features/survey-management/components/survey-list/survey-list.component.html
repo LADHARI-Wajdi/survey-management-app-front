@@ -1,1 +1,137 @@
-<p>survey-list works!</p>
+<!-- features/survey-management/components/survey-list/survey-list.component.html -->
+<div class="survey-list-container">
+    <div class="header-section">
+      <h1 class="page-title">Mes enquêtes</h1>
+      <button class="btn btn-primary" routerLink="/surveys/create">
+        <i class="fa fa-plus"></i> Créer une enquête
+      </button>
+    </div>
+  
+    <div class="filter-section">
+      <div class="search-box">
+        <input 
+          type="text" 
+          placeholder="Rechercher une enquête..." 
+          [(ngModel)]="searchTerm"
+          (input)="applyFilter()"
+        />
+        <button>
+          <i class="fa fa-search"></i>
+        </button>
+      </div>
+      
+      <div class="filter-options">
+        <div class="filter-group">
+          <label>Statut:</label>
+          <select [(ngModel)]="statusFilter" (change)="applyFilter()">
+            <option value="all">Tous</option>
+            <option value="draft">Brouillons</option>
+            <option value="published">Publiées</option>
+            <option value="closed">Clôturées</option>
+          </select>
+        </div>
+        
+        <div class="filter-group">
+          <label>Trier par:</label>
+          <select [(ngModel)]="sortOption" (change)="applyFilter()">
+            <option value="recent">Plus récentes</option>
+            <option value="alphabetical">Alphabétique</option>
+            <option value="responses">Nombre de réponses</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  
+    <div class="loader-container" *ngIf="isLoading">
+      <div class="spinner">
+        <div class="bounce1"></div>
+        <div class="bounce2"></div>
+        <div class="bounce3"></div>
+      </div>
+      <div class="loader-text">Chargement des enquêtes...</div>
+    </div>
+  
+    <div class="surveys-grid" *ngIf="!isLoading && filteredSurveys.length > 0">
+      <div class="survey-card" *ngFor="let survey of filteredSurveys">
+        <div class="survey-status" [ngClass]="getStatusClass(survey.status)">
+          {{ getStatusLabel(survey.status) }}
+        </div>
+        
+        <div class="survey-header">
+          <h3 class="survey-title">{{ survey.title }}</h3>
+          <div class="survey-date">
+            Créée le {{ survey.creationDate | date:'dd/MM/yyyy' }}
+          </div>
+        </div>
+        
+        <div class="survey-content">
+          <p class="survey-description" *ngIf="survey.description">
+            {{ survey.description | truncate:120:true }}
+          </p>
+          <div class="survey-stats">
+            <div class="stat-item">
+              <i class="fa fa-question-circle"></i>
+              <span>{{ survey.sections[0].questions.length || 0 }} questions</span>
+            </div>
+            <div class="stat-item">
+              <i class="fa fa-chart-bar"></i>
+              <span>{{ survey['responseCount'] || 0 }} réponses</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="survey-actions">
+          <button 
+            class="btn btn-icon btn-primary" 
+            [routerLink]="['/surveys', survey.id]"
+            matTooltip="Voir les détails">
+            <i class="fa fa-eye"></i>
+          </button>
+          <button 
+            class="btn btn-icon btn-secondary" 
+            [routerLink]="['/surveys', survey.id, 'edit']"
+            *ngIf="survey.status !== 'closed'"
+            matTooltip="Modifier">
+            <i class="fa fa-edit"></i>
+          </button>
+          <button 
+            class="btn btn-icon btn-accent" 
+            [routerLink]="['/distribution', survey.id]"
+            *ngIf="survey.status === 'published'"
+            matTooltip="Distribuer">
+            <i class="fa fa-share-alt"></i>
+          </button>
+          <button 
+            class="btn btn-icon btn-success" 
+            [routerLink]="['/analytics/survey', survey.id]"
+            *ngIf="survey['responseCount'] > 0"
+            matTooltip="Analyser">
+            <i class="fa fa-chart-line"></i>
+          </button>
+          <button 
+            class="btn btn-icon btn-danger"
+            (click)="deleteSurvey(survey)"
+            matTooltip="Supprimer">
+            <i class="fa fa-trash"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  
+    <div class="empty-state" *ngIf="!isLoading && filteredSurveys.length === 0">
+      <div class="empty-icon">
+        <i class="fa fa-clipboard-list fa-3x"></i>
+      </div>
+      <h3>Aucune enquête trouvée</h3>
+      <p *ngIf="searchTerm || statusFilter !== 'all'">
+        Aucune enquête ne correspond à vos critères de recherche.
+        <a href="javascript:void(0)" (click)="resetFilters()">Réinitialiser les filtres</a>
+      </p>
+      <p *ngIf="!searchTerm && statusFilter === 'all'">
+        Vous n'avez pas encore créé d'enquêtes.
+      </p>
+      <button class="btn btn-primary" routerLink="/surveys/create">
+        Créer votre première enquête
+      </button>
+    </div>
+  </div>

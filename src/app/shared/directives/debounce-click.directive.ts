@@ -4,14 +4,15 @@ import { Subject, Subscription } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 
 @Directive({
-  selector: '[appDebounceClick]'
+  selector: '[appDebounceClick]',
+  standalone: true
 })
 export class DebounceClickDirective implements OnInit, OnDestroy {
   @Input() debounceTime = 500;
   @Output() appDebounceClick = new EventEmitter<any>();
   
   private clicks = new Subject<any>();
-  private subscription: Subscription;
+  private subscription: Subscription | undefined;
 
   constructor() { }
 
@@ -24,7 +25,7 @@ export class DebounceClickDirective implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
   @HostListener('click', ['$event'])

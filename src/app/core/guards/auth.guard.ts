@@ -1,15 +1,11 @@
-import { CanActivateFn } from '@angular/router';
-
-export const authGuard: CanActivateFn = (route, state) => {
-  return true;
-};
 // core/guards/auth.guard.ts
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import {
   CanActivate,
   ActivatedRouteSnapshot,
   RouterStateSnapshot,
   Router,
+  UrlTree
 } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map, take } from 'rxjs/operators';
@@ -24,14 +20,14 @@ export class AuthGuard implements CanActivate {
   canActivate(
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
-  ): Observable<boolean> | boolean {
+  ): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
     const token = localStorage.getItem('auth_token');
 
     if (!token) {
-      this.router.navigate(['/auth/login'], {
-        queryParams: { returnUrl: state.url },
+      // Redirect to login page with return URL
+      return this.router.createUrlTree(['/auth/login'], {
+        queryParams: { returnUrl: state.url }
       });
-      return false;
     }
 
     return this.authService.currentUser$.pipe(
@@ -40,12 +36,44 @@ export class AuthGuard implements CanActivate {
         if (user) {
           return true;
         } else {
-          this.router.navigate(['/auth/login'], {
-            queryParams: { returnUrl: state.url },
+          // Redirect to login page with return URL
+          return this.router.createUrlTree(['/auth/login'], {
+            queryParams: { returnUrl: state.url }
           });
-          return false;
         }
       })
     );
   }
 }
+
+// Implement as a functional guard for modern Angular
+export const authGuard = (
+  route: ActivatedRouteSnapshot,
+  state: RouterStateSnapshot
+) => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
+  
+  const token = localStorage.getItem('auth_token');
+
+  if (!token) {
+    // Redirect to login page with return URL
+    return router.createUrlTree(['/auth/login'], {
+      queryParams: { returnUrl: state.url }
+    });
+  }
+
+  return authService.currentUser$.pipe(
+    take(1),
+    map((user) => {
+      if (user) {
+        return true;
+      } else {
+        // Redirect to login page with return URL
+        return router.createUrlTree(['/auth/login'], {
+          queryParams: { returnUrl: state.url }
+        });
+      }
+    })
+  );
+};

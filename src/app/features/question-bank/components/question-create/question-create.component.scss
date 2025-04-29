@@ -1,0 +1,120 @@
+// features/question-bank/components/question-create/question-create.component.scss
+
+.question-form-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+  
+    .form-title {
+      font-size: 24px;
+      font-weight: 500;
+      color: #3f51b5;
+      margin-bottom: 20px;
+    }
+  
+    .form-card {
+      margin-bottom: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    }
+  
+    .form-section {
+      margin-bottom: 25px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #eee;
+  
+      &:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+      }
+  
+      .section-title {
+        font-size: 16px;
+        font-weight: 500;
+        color: #555;
+        margin-bottom: 15px;
+      }
+    }
+  
+    .full-width {
+      width: 100%;
+    }
+  
+    .medium-width {
+      width: 48%;
+      margin-right: 2%;
+  
+      &:last-child {
+        margin-right: 0;
+      }
+    }
+  
+    .input-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      align-items: center;
+  
+      @media (max-width: 768px) {
+        flex-direction: column;
+  
+        .medium-width {
+          width: 100%;
+          margin-right: 0;
+        }
+      }
+    }
+  
+    .checkbox-field {
+      margin: 15px 0;
+    }
+  
+    // Styles pour les options
+    .option-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+  
+      .option-text {
+        flex: 2;
+        margin-right: 10px;
+      }
+  
+      .option-value {
+        flex: 1;
+        margin-right: 10px;
+      }
+    }
+  
+    .add-option-btn {
+      margin-top: 10px;
+  
+      button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+  
+        mat-icon {
+          margin-right: 8px;
+        }
+      }
+    }
+  }
+  
+  // Animation pour les options
+  .option-item {
+    transition: all 0.3s ease;
+    animation: fade-in 0.3s ease-out;
+  }
+  
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }

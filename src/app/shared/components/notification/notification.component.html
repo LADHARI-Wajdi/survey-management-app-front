@@ -1,30 +1,34 @@
 <!-- shared/components/notification/notification.component.html -->
-<div class="notifications-container">
-  <div
-    class="notification-item"
-    *ngFor="let notification of notifications"
-    [ngClass]="{
-      success: notification.type === NotificationType.SUCCESS,
-      error: notification.type === NotificationType.ERROR,
-      warning: notification.type === NotificationType.WARNING,
-      info: notification.type === NotificationType.INFO
-    }"
-  >
-    <div class="notification-icon">
-      <i class="fa" [ngClass]="getIcon(notification.type)"></i>
-    </div>
+<div class="notification-container">
+  <div *ngFor="let notification of notifications"
+       class="notification"
+       [ngClass]="{'notification-success': notification.type === 'success',
+                   'notification-error': notification.type === 'error',
+                   'notification-info': notification.type === 'info',
+                   'notification-warning': notification.type === 'warning'}">
     <div class="notification-content">
-      <div class="notification-message">{{ notification.message }}</div>
-      <button
-        class="action-button"
-        *ngIf="notification.action"
-        (click)="executeAction(notification)"
-      >
+      <div class="notification-icon">
+        <i class="fas"
+           [ngClass]="{'fa-check-circle': notification.type === 'success',
+                      'fa-exclamation-circle': notification.type === 'error',
+                      'fa-info-circle': notification.type === 'info',
+                      'fa-exclamation-triangle': notification.type === 'warning'}">
+        </i>
+      </div>
+      <div class="notification-message">
+        {{ notification.message }}
+      </div>
+    </div>
+    
+    <div class="notification-actions">
+      <button *ngIf="notification.action"
+              class="notification-action-btn"
+              (click)="onActionClick(notification)">
         {{ notification.action.text }}
       </button>
+      <button class="notification-close-btn" (click)="close(notification)">
+        <i class="fas fa-times"></i>
+      </button>
     </div>
-    <button class="close-button" (click)="closeNotification(notification.id)">
-      <i class="fa fa-times"></i>
-    </button>
   </div>
 </div>

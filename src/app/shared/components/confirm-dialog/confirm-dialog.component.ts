@@ -1,5 +1,6 @@
 // shared/components/confirm-dialog/confirm-dialog.component.ts
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 export interface ConfirmDialogOptions {
   title?: string;
@@ -13,7 +14,9 @@ export interface ConfirmDialogOptions {
 @Component({
   selector: 'app-confirm-dialog',
   templateUrl: './confirm-dialog.component.html',
-  styleUrls: ['./confirm-dialog.component.scss']
+  styleUrls: ['./confirm-dialog.component.scss'],
+  standalone: true,
+  imports: [CommonModule],
 })
 export class ConfirmDialogComponent implements OnInit {
   @Input() isOpen = false;
@@ -23,17 +26,16 @@ export class ConfirmDialogComponent implements OnInit {
     confirmText: 'Confirmer',
     cancelText: 'Annuler',
     confirmType: 'primary',
-    dialogClass: ''
+    dialogClass: '',
   };
-  
+
   @Output() confirm = new EventEmitter<void>();
   @Output() cancel = new EventEmitter<void>();
   @Output() close = new EventEmitter<void>();
 
-  constructor() { }
+  constructor() {}
 
-  ngOnInit(): void {
-  }
+  ngOnInit(): void {}
 
   onConfirm(): void {
     this.confirm.emit();

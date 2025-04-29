@@ -12,6 +12,7 @@ export enum SurveyType {
 }
 
 export interface Survey {
+[x: string]: any;
   id: string;
   title: string;
   description?: string;

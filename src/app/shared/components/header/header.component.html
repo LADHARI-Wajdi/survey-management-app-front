@@ -1,1 +1,78 @@
-<p>header works!</p>
+<!-- src/app/shared/components/header/header.component.html -->
+<header class="header">
+    <div class="header-left">
+      <button class="menu-toggle-btn d-md-none" (click)="toggleMenu()">
+        <i class="fa fa-bars"></i>
+      </button>
+      <div class="page-title">
+        <h1>{{ pageTitle }}</h1>
+      </div>
+    </div>
+    
+    <div class="header-right">
+      <!-- Recherche (Visible pour tous les utilisateurs authentifiés) -->
+      <div class="search-box" *ngIf="authService.currentUserValue">
+        <input type="text" placeholder="Rechercher..." />
+        <button>
+          <i class="fa fa-search"></i>
+        </button>
+      </div>
+      
+      <!-- Notifications (visible pour les utilisateurs authentifiés) -->
+      <div class="header-actions" *ngIf="authService.currentUserValue">
+        <div class="action-item notifications">
+          <button class="btn-icon">
+            <i class="fa fa-bell"></i>
+            <span class="badge" *ngIf="notificationsCount > 0">{{
+              notificationsCount
+            }}</span>
+          </button>
+        </div>
+        
+        <!-- Centre d'aide -->
+        <div class="action-item help">
+          <button class="btn-icon">
+            <i class="fa fa-question-circle"></i>
+          </button>
+        </div>
+        
+        <!-- Menu utilisateur -->
+        <div class="action-item user-dropdown d-none d-md-block" *ngIf="authService.currentUserValue">
+          <div class="dropdown">
+            <button class="btn-user dropdown-toggle" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+              <span class="user-name">
+                {{ authService.currentUserValue?.firstName }} {{ authService.currentUserValue?.lastName }}
+              </span>
+              <span class="user-role" *ngIf="authService.isAdmin()">Admin</span>
+              <span class="user-role" *ngIf="authService.isSurveyor() && !authService.isAdmin()">Enquêteur</span>
+              <span class="user-role" *ngIf="authService.isParticipant() && !authService.isSurveyor()">Participant</span>
+              <i class="fa fa-chevron-down"></i>
+            </button>
+            
+            <ul class="dropdown-menu" aria-labelledby="userDropdown">
+              <li><a class="dropdown-item" routerLink="/profile">Mon profil</a></li>
+              
+              <!-- Options spécifiques par rôle -->
+              <li *appHasRole="[UserRole.ADMIN, UserRole.SURVEYOR]">
+                <a class="dropdown-item" routerLink="/surveys/create">Créer une enquête</a>
+              </li>
+              
+              <li *appHasRole="UserRole.ADMIN">
+                <a class="dropdown-item" routerLink="/admin/dashboard">Administration</a>
+              </li>
+              
+              <li><hr class="dropdown-divider"></li>
+              
+              <li><a class="dropdown-item" (click)="logout()">Déconnexion</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Boutons pour utilisateurs non-authentifiés -->
+      <div class="auth-buttons" *ngIf="!authService.currentUserValue">
+        <a routerLink="/auth/login" class="btn btn-outline-primary">Connexion</a>
+        <a routerLink="/auth/register" class="btn btn-primary ml-2">Inscription</a>
+      </div>
+    </div>
+  </header>

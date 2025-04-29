@@ -1,248 +1,239 @@
 <div class="analytics-dashboard">
-  <h1 class="page-title">
-    Analyses - {{ currentSurvey?.title || "Toutes les enquêtes" }}
-  </h1>
-
-  <!-- Filtres -->
-  <div class="filters">
-    <div class="filter-item">
-      <label for="survey-select">Enquête</label>
-      <select
-        id="survey-select"
-        class="form-control"
-        [(ngModel)]="selectedSurveyId"
-        (change)="onSurveyChange()"
-      >
-        <option value="">Toutes les enquêtes</option>
-        <option *ngFor="let survey of surveys" [value]="survey.id">
-          {{ survey.title }}
-        </option>
-      </select>
+  <!-- Dashboard Header -->
+  <div class="dashboard-header">
+    <div class="title-section">
+      <h1>Analytics Dashboard</h1>
+      <p class="subtitle">Get insights into your survey performance</p>
     </div>
 
-    <div class="filter-item">
-      <label for="period-select">Période</label>
-      <select
-        id="period-select"
-        class="form-control"
-        [(ngModel)]="selectedPeriod"
-        (change)="onPeriodChange()"
-      >
-        <option value="day">Aujourd'hui</option>
-        <option value="week">Cette semaine</option>
-        <option value="month">Dernier mois</option>
-        <option value="quarter">Dernier trimestre</option>
-        <option value="year">Cette année</option>
-        <option value="all">Toutes les données</option>
-      </select>
-    </div>
-
-    <div class="filter-item">
-      <label for="response-type">Type de réponses</label>
-      <select
-        id="response-type"
-        class="form-control"
-        [(ngModel)]="responseType"
-        (change)="onResponseTypeChange()"
-      >
-        <option value="all">Toutes les réponses</option>
-        <option value="complete">Complètes seulement</option>
-        <option value="incomplete">Incomplètes seulement</option>
-      </select>
-    </div>
-
-    <button class="btn btn-primary export-btn" (click)="exportData()">
-      <i class="material-icons">download</i> Exporter
-    </button>
-  </div>
-
-  <!-- Résumé -->
-  <div class="summary-card" *ngIf="analytics">
-    <h2 class="section-title">Résumé</h2>
-
-    <div class="summary-stats">
-      <div class="stat-item">
-        <span class="stat-label">Réponses</span>
-        <span class="stat-value primary">{{ analytics.totalResponses }}</span>
-      </div>
-
-      <div class="stat-item">
-        <span class="stat-label">Taux</span>
-        <span class="stat-value success">{{ analytics.completionRate }}%</span>
-      </div>
-
-      <div class="stat-item">
-        <span class="stat-label">Note moyenne</span>
-        <span class="stat-value secondary"
-          >{{ analytics.averageRating }}/5</span
+    <div class="actions-section">
+      <div class="time-range-selector">
+        <label for="timeRange">Time Range:</label>
+        <select
+          id="timeRange"
+          class="form-control"
+          [ngModel]="selectedTimeRange"
+          (change)="onTimeRangeChange($event)"
         >
+          <option
+            *ngFor="let option of timeRangeOptions"
+            [value]="option.value"
+          >
+            {{ option.label }}
+          </option>
+        </select>
       </div>
 
-      <div class="stat-item">
-        <span class="stat-label">Temps moyen</span>
-        <span class="stat-value accent">{{
-          formatTime(analytics.averageTime)
-        }}</span>
-      </div>
+      <button
+        class="btn btn-outline-primary refresh-btn"
+        (click)="refreshData()"
+      >
+        <i class="fas fa-sync-alt"></i> Refresh
+      </button>
     </div>
   </div>
 
-  <div class="analytics-content" *ngIf="analytics">
-    <!-- Distribution des réponses -->
-    <div class="chart-card">
-      <div class="card-header">
-        <h2 class="section-title">Distribution des réponses</h2>
+  <!-- Loading Spinner -->
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="spinner-border text-primary" role="status">
+      <span class="sr-only">Loading...</span>
+    </div>
+    <p>Loading dashboard data...</p>
+  </div>
 
-        <div class="chart-legend">
-          <div class="legend-item">
-            <div class="legend-color secondary"></div>
-            <span>Satisfaction</span>
+  <!-- Error Message -->
+  <div *ngIf="hasError" class="error-container">
+    <div class="alert alert-danger">
+      <i class="fas fa-exclamation-triangle"></i>
+      <span>{{ errorMessage }}</span>
+    </div>
+    <button class="btn btn-primary" (click)="refreshData()">Try Again</button>
+  </div>
+
+  <!-- Dashboard Content -->
+  <div *ngIf="!isLoading && !hasError" class="dashboard-content">
+    <!-- KPI Summary Cards -->
+    <div class="kpi-cards">
+      <div class="kpi-card">
+        <div class="kpi-icon">
+          <i class="fas fa-clipboard-list"></i>
+        </div>
+        <div class="kpi-details">
+          <h3 class="kpi-value">{{ totalSurveys }}</h3>
+          <p class="kpi-label">Total Surveys</p>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon">
+          <i class="fas fa-poll"></i>
+        </div>
+        <div class="kpi-details">
+          <h3 class="kpi-value">{{ totalResponses }}</h3>
+          <p class="kpi-label">Total Responses</p>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="kpi-details">
+          <h3 class="kpi-value">
+            {{ formatPercentage(averageCompletionRate) }}
+          </h3>
+          <p class="kpi-label">Avg Completion Rate</p>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon">
+          <i class="fas fa-clock"></i>
+        </div>
+        <div class="kpi-details">
+          <h3 class="kpi-value">{{ formatTime(averageTimeToComplete) }}</h3>
+          <p class="kpi-label">Avg Time to Complete</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="charts-grid">
+      <!-- Responses Over Time Chart -->
+      <div class="chart-container large">
+        <div class="chart-header">
+          <h2>Responses Over Time</h2>
+          <div class="chart-actions">
+            <button class="btn btn-sm btn-icon">
+              <i class="fas fa-ellipsis-v"></i>
+            </button>
+          </div>
+        </div>
+        <div class="chart-body">
+          <app-line-chart
+            *ngIf="responsesOverTimeData"
+            data()="responsesOverTimeData"
+            [height]="300"
+          ></app-line-chart>
+          <div *ngIf="!responsesOverTimeData" class="no-data-message">
+            No response data available for the selected time range.
           </div>
         </div>
       </div>
 
+      <!-- Completion Rate Chart -->
       <div class="chart-container">
-        <canvas
-          baseChart
-          [datasets]="barChartData"
-          [labels]="barChartLabels"
-          [options]="barChartOptions"
-          [plugins]="barChartPlugins"
-          [legend]="barChartLegend"
-          [type]="'bar'"
-        >
-        </canvas>
-      </div>
-    </div>
-
-    <!-- Réponses récentes -->
-    <div class="responses-card">
-      <h2 class="section-title">Dernières réponses</h2>
-
-      <div class="responses-list">
-        <div class="response-item" *ngFor="let response of recentResponses">
-          <div class="response-user">
-            <span>{{ response.user || "Anonyme" }}</span>
-          </div>
-
-          <div
-            class="response-rating"
-            [ngClass]="getRatingClass(response.rating)"
-          >
-            <span>{{ response.rating }} ★</span>
-          </div>
-
-          <div class="response-date">
-            <span>{{ response.date | date : "short" }}</span>
+        <div class="chart-header">
+          <h2>Completion Rate</h2>
+          <div class="chart-actions">
+            <button class="btn btn-sm btn-icon">
+              <i class="fas fa-ellipsis-v"></i>
+            </button>
           </div>
         </div>
-
-        <div class="no-responses" *ngIf="recentResponses.length === 0">
-          <p>Aucune réponse à afficher</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Questions individuelles -->
-  <div
-    class="questions-analysis"
-    *ngIf="analytics && analytics.questions.length > 0"
-  >
-    <h2 class="section-title">Analyse par question</h2>
-
-    <div class="question-card" *ngFor="let question of analytics.questions">
-      <h3 class="question-title">{{ question.title }}</h3>
-
-      <div class="question-stats">
-        <div class="question-stat-item">
-          <span class="stat-label">Taux de réponse</span>
-          <span class="stat-value">{{ question.responseRate }}%</span>
-        </div>
-
-        <div class="question-stat-item" *ngIf="question.averageRating">
-          <span class="stat-label">Note moyenne</span>
-          <span class="stat-value">{{ question.averageRating }}/5</span>
+        <div class="chart-body">
+          <app-pie-chart
+            *ngIf="completionRateData"
+            [data]="completionRateData"
+            [height]="250"
+            [showPercentages]="true"
+          ></app-pie-chart>
+          <div *ngIf="!completionRateData" class="no-data-message">
+            No completion data available for the selected time range.
+          </div>
         </div>
       </div>
 
-      <div class="question-chart" [ngSwitch]="question.type">
-        <div *ngSwitchCase="'single_choice'">
-          <canvas
-            baseChart
-            [data]="getPieData(question)"
-            [labels]="getPieLabels(question)"
-            [options]="pieChartOptions"
-            [type]="'pie'"
-          >
-          </canvas>
-        </div>
-
-        <div *ngSwitchCase="'multiple_choice'">
-          <canvas
-            baseChart
-            [datasets]="getBarData(question)"
-            [labels]="getBarLabels(question)"
-            [options]="barChartOptions"
-            [type]="'bar'"
-          >
-          </canvas>
-        </div>
-
-        <div *ngSwitchCase="'rating'">
-          <div class="rating-distribution">
-            <div
-              class="rating-bar"
-              *ngFor="let rating of question.ratingDistribution; let i = index"
-            >
-              <span class="rating-label">{{ i + 1 }} ★</span>
-              <div class="rating-value-bar" [style.width.%]="rating.percentage">
-                <span class="rating-value-text">{{ rating.percentage }}%</span>
-              </div>
-            </div>
+      <!-- Question Distribution Chart -->
+      <div class="chart-container">
+        <div class="chart-header">
+          <h2>Question Types Distribution</h2>
+          <div class="chart-actions">
+            <button class="btn btn-sm btn-icon">
+              <i class="fas fa-ellipsis-v"></i>
+            </button>
           </div>
         </div>
-
-        <div *ngSwitchCase="'text_short'" class="text-responses">
-          <div class="word-cloud" *ngIf="question.wordFrequency">
-            <div
-              *ngFor="let word of question.wordFrequency"
-              class="word-item"
-              [style.font-size.px]="getWordSize(word.frequency)"
-            >
-              {{ word.text }}
-            </div>
+        <div class="chart-body">
+          <app-pie-chart
+            *ngIf="questionDistributionData"
+            [data]="questionDistributionData"
+            [height]="250"
+            [showPercentages]="true"
+          ></app-pie-chart>
+          <div *ngIf="!questionDistributionData" class="no-data-message">
+            No question data available for the selected time range.
           </div>
         </div>
+      </div>
 
-        <div *ngSwitchDefault class="no-chart">
-          <p>Visualisation non disponible pour ce type de question</p>
+      <!-- Average Time to Complete Chart -->
+      <div class="chart-container">
+        <div class="chart-header">
+          <h2>Average Time to Complete</h2>
+          <div class="chart-actions">
+            <button class="btn btn-sm btn-icon">
+              <i class="fas fa-ellipsis-v"></i>
+            </button>
+          </div>
+        </div>
+        <div class="chart-body">
+          <app-bar-chart
+            *ngIf="avgTimeToCompleteData"
+            [data]="avgTimeToCompleteData"
+            [height]="250"
+          ></app-bar-chart>
+          <div *ngIf="!avgTimeToCompleteData" class="no-data-message">
+            No time data available for the selected time range.
+          </div>
+        </div>
+      </div>
+
+      <!-- Device Breakdown Chart -->
+      <div class="chart-container">
+        <div class="chart-header">
+          <h2>Device Breakdown</h2>
+          <div class="chart-actions">
+            <button class="btn btn-sm btn-icon">
+              <i class="fas fa-ellipsis-v"></i>
+            </button>
+          </div>
+        </div>
+        <div class="chart-body">
+          <app-pie-chart
+            *ngIf="deviceBreakdownData"
+            [data]="deviceBreakdownData"
+            [height]="250"
+            [showPercentages]="true"
+          ></app-pie-chart>
+          <div *ngIf="!deviceBreakdownData" class="no-data-message">
+            No device data available for the selected time range.
+          </div>
+        </div>
+      </div>
+
+      <!-- User Demographics Chart -->
+      <div class="chart-container">
+        <div class="chart-header">
+          <h2>User Demographics</h2>
+          <div class="chart-actions">
+            <button class="btn btn-sm btn-icon">
+              <i class="fas fa-ellipsis-v"></i>
+            </button>
+          </div>
+        </div>
+        <div class="chart-body">
+          <app-bar-chart
+            *ngIf="userDemographicsData"
+            [data]="userDemographicsData"
+            [height]="250"
+          ></app-bar-chart>
+          <div *ngIf="!userDemographicsData" class="no-data-message">
+            No demographics data available for the selected time range.
+          </div>
         </div>
       </div>
     </div>
-  </div>
-
-  <!-- État de chargement -->
-  <div class="loading-state" *ngIf="isLoading">
-    <div class="spinner"></div>
-    <p>Chargement des analyses...</p>
-  </div>
-
-  <!-- État vide -->
-  <div
-    class="empty-state"
-    *ngIf="!isLoading && (!analytics || analytics.totalResponses === 0)"
-  >
-    <div class="empty-icon">
-      <i class="material-icons">insert_chart</i>
-    </div>
-    <h2>Pas encore de données</h2>
-    <p>
-      Les analyses seront disponibles dès que votre enquête recevra des
-      réponses.
-    </p>
-    <button class="btn btn-primary" (click)="goToDistribution()">
-      Distribuer cette enquête
-    </button>
   </div>
 </div>
+

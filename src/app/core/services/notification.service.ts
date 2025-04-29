@@ -1,131 +1,74 @@
 // core/services/notification.service.ts
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Subject, Observable } from 'rxjs';
 
 export enum NotificationType {
   SUCCESS = 'success',
   ERROR = 'error',
-  WARNING = 'warning',
   INFO = 'info',
+  WARNING = 'warning'
 }
 
 export interface Notification {
+  action: any;
   id: string;
-  message: string;
   type: NotificationType;
+  message: string;
+  autoClose?: boolean;
   timeout?: number;
-  timestamp: Date;
-  action?: {
-    text: string;
-    callback: () => void;
-  };
 }
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class NotificationService {
-  private notificationsSubject = new BehaviorSubject<Notification[]>([]);
-  public readonly notifications$: Observable<Notification[]> =
-    this.notificationsSubject.asObservable();
+  private notificationSubject = new Subject<Notification>();
+  private notificationId = 0;
+  notifications$: any;
 
-  constructor() {}
+  constructor() { }
 
-  // Helper methods for different notification types
-  success(
-    message: string,
-    timeout: number = 5000,
-    action?: { text: string; callback: () => void }
-  ): void {
-    this.addNotification({
-      message,
-      type: NotificationType.SUCCESS,
-      timeout,
-      action,
-    });
+  // Observable que les composants peuvent souscrire
+  onNotification(): Observable<Notification> {
+    return this.notificationSubject.asObservable();
   }
 
-  error(
-    message: string,
-    timeout: number = 0,
-    action?: { text: string; callback: () => void }
-  ): void {
-    this.addNotification({
-      message,
-      type: NotificationType.ERROR,
-      timeout,
-      action,
-    });
+  // Méthodes pour créer différents types de notifications
+  success(message: string, autoClose = true, timeout = 5000): void {
+    this.showNotification(NotificationType.SUCCESS, message, autoClose, timeout);
   }
 
-  warning(
-    message: string,
-    timeout: number = 7000,
-    action?: { text: string; callback: () => void }
-  ): void {
-    this.addNotification({
-      message,
-      type: NotificationType.WARNING,
-      timeout,
-      action,
-    });
+  error(message: string, autoClose = true, timeout = 5000): void {
+    this.showNotification(NotificationType.ERROR, message, autoClose, timeout);
   }
 
-  info(
-    message: string,
-    timeout: number = 5000,
-    action?: { text: string; callback: () => void }
-  ): void {
-    this.addNotification({
-      message,
-      type: NotificationType.INFO,
-      timeout,
-      action,
-    });
+  info(message: string, autoClose = true, timeout = 5000): void {
+    this.showNotification(NotificationType.INFO, message, autoClose, timeout);
   }
 
-  // Add a new notification
-  private addNotification(
-    notification: Omit<Notification, 'id' | 'timestamp'>
-  ): void {
-    const id = this.generateId();
-    const newNotification: Notification = {
-      ...notification,
+  warning(message: string, autoClose = true, timeout = 5000): void {
+    this.showNotification(NotificationType.WARNING, message, autoClose, timeout);
+  }
+
+  // Méthode pour créer une notification
+  private showNotification(type: NotificationType, message: string, autoClose: boolean, timeout: number): void {
+    this.notificationId++;
+    const id = `notification-${this.notificationId}`;
+    
+    this.notificationSubject.next({
       id,
-      timestamp: new Date(),
-    };
-
-    const currentNotifications = this.notificationsSubject.value;
-    this.notificationsSubject.next([...currentNotifications, newNotification]);
-
-    // Auto-remove notification after timeout if specified
-    if (notification.timeout && notification.timeout > 0) {
-      setTimeout(() => {
-        this.removeNotification(id);
-      }, notification.timeout);
-    }
+      type,
+      message,
+      autoClose,
+      timeout,
+      action: undefined
+    });
   }
 
-  // Remove a notification by id
+  // Méthode pour fermer une notification spécifique
   removeNotification(id: string): void {
-    const currentNotifications = this.notificationsSubject.value;
-    this.notificationsSubject.next(
-      currentNotifications.filter((notification) => notification.id !== id)
-    );
-  }
-
-  // Clear all notifications
-  clearAll(): void {
-    this.notificationsSubject.next([]);
-  }
-
-  // Generate a unique ID for notifications
-  private generateId(): string {
-    return (
-      'notification-' +
-      new Date().getTime() +
-      '-' +
-      Math.floor(Math.random() * 1000)
-    );
+    // Cette méthode serait utilisée par un composant de notification
+    // pour signaler la fermeture d'une notification
+    console.log(`Closing notification: ${id}`);
   }
 }

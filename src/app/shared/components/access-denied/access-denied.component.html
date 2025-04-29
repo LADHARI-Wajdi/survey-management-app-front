@@ -1,0 +1,33 @@
+<!-- shared/components/access-denied/access-denied.component.html -->
+<div class="access-denied-container">
+  <div class="access-denied-content">
+    <div class="icon-container">
+      <i class="material-icons error-icon">lock</i>
+    </div>
+    
+    <h1>Accès refusé</h1>
+    
+    <p class="error-message">
+      Vous n'avez pas les autorisations nécessaires pour accéder à cette page.
+    </p>
+    
+    <div class="role-info" *ngIf="userRoles && userRoles.length > 0">
+      <p>Vos rôles actuels:</p>
+      <ul class="role-list">
+        <li *ngFor="let role of userRoles">{{ role | titlecase }}</li>
+      </ul>
+    </div>
+    
+    <div class="action-buttons">
+      <button class="btn btn-secondary" (click)="goBack()">
+        <i class="material-icons">arrow_back</i>
+        Retour
+      </button>
+      
+      <a routerLink="/dashboard" class="btn btn-primary">
+        <i class="material-icons">home</i>
+        Aller au tableau de bord
+      </a>
+    </div>
+  </div>
+</div>

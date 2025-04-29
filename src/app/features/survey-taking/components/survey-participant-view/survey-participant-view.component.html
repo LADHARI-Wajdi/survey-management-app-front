@@ -1,1 +1,91 @@
-<p>survey-participant-view works!</p>
+<!-- src/app/features/survey-taking/components/survey-participant-view/survey-participant-view.component.html -->
+<div class="survey-participant-view">
+  <!-- Loading state -->
+  <div class="loading-container" *ngIf="isLoading">
+    <div class="loader">
+      <div class="spinner"></div>
+      <span>Chargement de l'enquête...</span>
+    </div>
+  </div>
+
+  <!-- Error state -->
+  <div class="error-container" *ngIf="hasError">
+    <div class="error-icon">
+      <i class="material-icons">error_outline</i>
+    </div>
+    <h2>Une erreur est survenue</h2>
+    <p>{{ errorMessage }}</p>
+    <button class="btn btn-primary" routerLink="/">Retour à l'accueil</button>
+  </div>
+
+  <!-- Main survey content -->
+  <div class="survey-container" *ngIf="!isLoading && !hasError">
+    <!-- Survey completion screen -->
+    <div class="completion-container" *ngIf="surveyCompleted">
+
+      
+    </div>
+
+    <!-- Survey taking interface -->
+    <div class="survey-content" *ngIf="!surveyCompleted && survey">
+      <!-- Header -->
+      <div class="survey-header">
+        <h1 class="survey-title">{{ survey.title }}</h1>
+        <p class="survey-description" *ngIf="survey.description">{{ survey.description }}</p>
+        
+        <!-- Progress bar -->
+        <div class="progress-bar-container" *ngIf="survey.settings?.showProgressBar">
+          <div class="progress-bar">
+            <div class="progress-fill" [style.width.%]="progressPercentage"></div>
+          </div>
+          <div class="progress-text">{{ progressPercentage }}% complété</div>
+        </div>
+      </div>
+
+      <!-- Question view -->
+      <div class="question-container" *ngIf="currentQuestion">
+        <app-question-response
+          [question]="currentQuestion"
+          [responseValue]="getResponse(currentQuestion.id)"
+          [showValidation]="true"
+          (responseChange)="onResponseChange($event)"
+        ></app-question-response>
+      </div>
+
+      <!-- Navigation buttons -->
+      <div class="survey-navigation">
+        <button 
+          class="btn btn-secondary" 
+          *ngIf="currentQuestionIndex > 0"
+          (click)="prevQuestion()"
+        >
+          <i class="material-icons">arrow_back</i>
+          Précédent
+        </button>
+        
+        <button 
+          class="btn btn-outline"
+          *ngIf="survey.settings?.allowIncomplete"
+          (click)="saveDraft()"
+        >
+          <i class="material-icons">save</i>
+          Enregistrer
+        </button>
+        
+        <button 
+          class="btn btn-primary"
+          (click)="nextQuestion()"
+        >
+          <span *ngIf="currentQuestionIndex < questions.length - 1">
+            Suivant
+            <i class="material-icons">arrow_forward</i>
+          </span>
+          <span *ngIf="currentQuestionIndex >= questions.length - 1">
+            Terminer
+            <i class="material-icons">check</i>
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

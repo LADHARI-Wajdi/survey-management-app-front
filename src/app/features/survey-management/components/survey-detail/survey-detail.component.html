@@ -1,1 +1,264 @@
-<p>survey-detail works!</p>
+<!-- features/survey-management/components/survey-detail/survey-detail.component.html -->
+<div class="survey-detail-container" *ngIf="survey">
+    <div class="header-section">
+      <div class="title-section">
+        <h1 class="page-title">{{ survey.title }}</h1>
+        <div class="status-badge" [ngClass]="getStatusClass(survey.status)">
+          {{ getStatusLabel(survey.status) }}
+        </div>
+      </div>
+      
+      <div class="action-buttons">
+        <button class="btn btn-secondary" routerLink="/surveys">
+          <i class="fa fa-arrow-left"></i> Retour
+        </button>
+        
+        <button 
+          class="btn btn-primary" 
+          [routerLink]="['/surveys', survey.id, 'edit']"
+          *ngIf="survey.status !== 'closed'">
+          <i class="fa fa-edit"></i> Modifier
+        </button>
+        
+        <button 
+          class="btn btn-accent" 
+          [routerLink]="['/distribution', survey.id]"
+          *ngIf="survey.status === 'published'">
+          <i class="fa fa-share-alt"></i> Distribuer
+        </button>
+        
+        <button 
+          class="btn btn-success" 
+          [routerLink]="['/analytics/survey', survey.id]"
+          *ngIf="responseCount > 0">
+          <i class="fa fa-chart-bar"></i> Analyser
+        </button>
+        
+        <button 
+          class="btn btn-outline" 
+          (click)="duplicateSurvey()">
+          <i class="fa fa-copy"></i> Dupliquer
+        </button>
+        
+        <div class="dropdown">
+          <button class="btn btn-icon-only dropdown-toggle">
+            <i class="fa fa-ellipsis-v"></i>
+          </button>
+          <div class="dropdown-menu">
+            <a class="dropdown-item" (click)="toggleSurveyStatus()">
+              <i class="fa" [ngClass]="survey.status === 'published' ? 'fa-lock' : 'fa-paper-plane'"></i>
+              {{ survey.status === 'published' ? 'Clôturer' : 'Publier' }}
+            </a>
+            <a class="dropdown-item" [routerLink]="['/surveys', survey.id, 'settings']">
+              <i class="fa fa-cog"></i> Paramètres
+            </a>
+            <a class="dropdown-item text-danger" (click)="deleteSurvey()">
+              <i class="fa fa-trash"></i> Supprimer
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+    <div class="info-cards">
+      <div class="info-card">
+        <div class="card-icon">
+          <i class="fa fa-calendar-alt"></i>
+        </div>
+        <div class="card-content">
+          <div class="card-label">Créée le</div>
+          <div class="card-value">{{ survey.creationDate | date:'dd/MM/yyyy' }}</div>
+        </div>
+      </div>
+      
+      <div class="info-card">
+        <div class="card-icon">
+          <i class="fa fa-question-circle"></i>
+        </div>
+        <div class="card-content">
+          <div class="card-label">Questions</div>
+          <div class="card-value">{{ totalQuestions }}</div>
+        </div>
+      </div>
+      
+      <div class="info-card">
+        <div class="card-icon">
+          <i class="fa fa-reply-all"></i>
+        </div>
+        <div class="card-content">
+          <div class="card-label">Réponses</div>
+          <div class="card-value">{{ responseCount }}</div>
+        </div>
+      </div>
+      
+      <div class="info-card" *ngIf="survey.expirationDate">
+        <div class="card-icon">
+          <i class="fa fa-hourglass-end"></i>
+        </div>
+        <div class="card-content">
+          <div class="card-label">Expire le</div>
+          <div class="card-value">{{ survey.expirationDate | date:'dd/MM/yyyy' }}</div>
+        </div>
+      </div>
+    </div>
+  
+    <div class="survey-description" *ngIf="survey.description">
+      <h2 class="section-title">Description</h2>
+      <p>{{ survey.description }}</p>
+    </div>
+  
+    <div class="questions-section">
+      <h2 class="section-title">Questions ({{ totalQuestions }})</h2>
+      
+      <div class="questions-list">
+        <ng-container *ngFor="let section of survey.sections; let i = index">
+          <div class="section-header" *ngIf="survey.sections.length > 1 || section.title">
+            <h3 class="section-title">{{ section.title || 'Section ' + (i + 1) }}</h3>
+            <p *ngIf="section.description">{{ section.description }}</p>
+          </div>
+          
+          <div class="question-card" *ngFor="let questionId of section.questions; let qIndex = index">
+            <div class="question-number">Q{{ getQuestionNumber(i, qIndex) }}</div>
+            <div class="question-content">
+              <div class="question-header">
+                <h4 class="question-title">{{ getQuestion(questionId)?.title }}</h4>
+                <div class="question-badge" [ngClass]="'type-' + getQuestion(questionId)?.type">
+                  {{ getQuestionTypeLabel(getQuestion(questionId)?.type || '') }}
+                </div>
+              </div>
+              
+              <p class="question-description" *ngIf="getQuestion(questionId)?.description">
+                {{ getQuestion(questionId)?.description }}
+              </p>
+              
+              <div class="question-details" [ngSwitch]="getQuestion(questionId)?.type">
+                <!-- Single Choice or Multiple Choice -->
+                <div class="options-list" *ngSwitchCase="'single_choice'" [ngClass]="'single'">
+                  <div class="option-item" *ngFor="let option of getQuestion(questionId)?.options">
+                    <span class="option-marker"></span>
+                    <span class="option-text">{{ option.text }}</span>
+                  </div>
+                </div>
+                
+                <div class="options-list" *ngSwitchCase="'multiple_choice'" [ngClass]="'multiple'">
+                  <div class="option-item" *ngFor="let option of getQuestion(questionId)?.options">
+                    <span class="option-marker"></span>
+                    <span class="option-text">{{ option.text }}</span>
+                  </div>
+                </div>
+                
+                <!-- Rating -->
+                <div class="rating-preview" *ngSwitchCase="'rating'">
+                  <div class="rating-stars">
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                  </div>
+                </div>
+                
+                <!-- Text inputs -->
+                <div class="text-preview short" *ngSwitchCase="'text_short'">
+                  <div class="text-field">Réponse courte</div>
+                </div>
+                
+                <div class="text-preview long" *ngSwitchCase="'text_long'">
+                  <div class="text-field">Réponse longue</div>
+                </div>
+                
+                <!-- Date -->
+                <div class="date-preview" *ngSwitchCase="'date'">
+                  <div class="date-field">JJ/MM/AAAA</div>
+                </div>
+                
+                <!-- File -->
+                <div class="file-preview" *ngSwitchCase="'file'">
+                  <div class="file-field">
+                    <i class="fa fa-upload"></i> Télécharger un fichier
+                  </div>
+                </div>
+              </div>
+              
+              <div class="question-required" *ngIf="getQuestion(questionId)?.isRequired">
+                * Cette question est obligatoire
+              </div>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+  
+    <div class="survey-settings">
+      <h2 class="section-title">Paramètres</h2>
+      
+      <div class="settings-list">
+        <div class="setting-item">
+          <div class="setting-name">Réponses anonymes</div>
+          <div class="setting-value">
+            {{ survey.settings.allowAnonymous ? 'Autorisées' : 'Non autorisées' }}
+          </div>
+        </div>
+        
+        <div class="setting-item">
+          <div class="setting-name">Barre de progression</div>
+          <div class="setting-value">
+            {{ survey.settings.showProgressBar ? 'Affichée' : 'Masquée' }}
+          </div>
+        </div>
+        
+        <div class="setting-item">
+          <div class="setting-name">Réponses incomplètes</div>
+          <div class="setting-value">
+            {{ survey.settings.allowIncomplete ? 'Autorisées' : 'Non autorisées' }}
+          </div>
+        </div>
+        
+        <div class="setting-item">
+          <div class="setting-name">Questions aléatoires</div>
+          <div class="setting-value">
+            {{ survey.settings.shuffleQuestions ? 'Activé' : 'Désactivé' }}
+          </div>
+        </div>
+        
+        <div class="setting-item" *ngIf="survey.settings.responseLimit">
+          <div class="setting-name">Limite de réponses</div>
+          <div class="setting-value">{{ survey.settings.responseLimit }}</div>
+        </div>
+        
+        <div class="setting-item">
+          <div class="setting-name">Notification à chaque réponse</div>
+          <div class="setting-value">
+            {{ survey.settings.notifyOnResponse ? 'Activée' : 'Désactivée' }}
+          </div>
+        </div>
+      </div>
+    </div>
+  
+    <div class="thank-you-message" *ngIf="survey.settings.thankYouMessage">
+      <h2 class="section-title">Message de remerciement</h2>
+      <div class="message-preview">
+        {{ survey.settings.thankYouMessage }}
+      </div>
+    </div>
+  </div>
+  
+  <div class="loader-container" *ngIf="isLoading">
+    <div class="spinner">
+      <div class="bounce1"></div>
+      <div class="bounce2"></div>
+      <div class="bounce3"></div>
+    </div>
+    <div class="loader-text">Chargement de l'enquête...</div>
+  </div>
+  
+  <div class="error-container" *ngIf="!isLoading && !survey">
+    <div class="error-icon">
+      <i class="fa fa-exclamation-triangle"></i>
+    </div>
+    <h2>Enquête introuvable</h2>
+    <p>L'enquête que vous recherchez n'existe pas ou a été supprimée.</p>
+    <button class="btn btn-primary" routerLink="/surveys">
+      Retour à la liste des enquêtes
+    </button>
+  </div>

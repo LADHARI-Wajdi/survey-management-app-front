@@ -1,1 +1,187 @@
-<p>question-list works!</p>
+<!-- features/question-bank/components/question-list/question-list.component.html -->
+<div class="question-list-container">
+    <!-- En-tête et actions -->
+    <div class="header-section">
+      <div class="header-title">
+        <h1>Banque de questions</h1>
+        <p *ngIf="!isLoading">{{ filteredQuestions.length }} question(s) disponible(s)</p>
+      </div>
+      <div class="header-actions">
+        <button mat-raised-button color="primary" (click)="createQuestion()" *ngIf="!isCreatingQuestion">
+          <mat-icon>add</mat-icon> Nouvelle question
+        </button>
+      </div>
+    </div>
+  
+    <!-- Filtres et recherche -->
+    <div class="filters-section" *ngIf="!isCreatingQuestion">
+      <div class="search-bar">
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Rechercher une question</mat-label>
+          <input matInput [(ngModel)]="searchQuery" (keyup.enter)="onSearch()" placeholder="Titre, description...">
+          <button *ngIf="searchQuery" matSuffix mat-icon-button aria-label="Effacer" (click)="searchQuery=''; onSearch()">
+            <mat-icon>close</mat-icon>
+          </button>
+          <button matSuffix mat-icon-button aria-label="Rechercher" (click)="onSearch()">
+            <mat-icon>search</mat-icon>
+          </button>
+        </mat-form-field>
+      </div>
+  
+      <div class="filter-options">
+        <mat-form-field appearance="outline" class="type-filter">
+          <mat-label>Types de questions</mat-label>
+          <mat-select [(ngModel)]="selectedTypes" multiple (selectionChange)="onTypeFilterChange()">
+            <mat-option *ngFor="let type of questionTypes" [value]="type">
+              {{ getQuestionTypeLabel(type) }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+  
+        <div class="sort-options">
+          <span class="sort-label">Trier par:</span>
+          <button mat-button [class.active]="sortMode === 'name'" (click)="changeSortMode('name')">
+            Nom
+          </button>
+          <button mat-button [class.active]="sortMode === 'type'" (click)="changeSortMode('type')">
+            Type
+          </button>
+          <button mat-button [class.active]="sortMode === 'date'" (click)="changeSortMode('date')">
+            Date
+          </button>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Créateur/Éditeur de question -->
+    <div *ngIf="isCreatingQuestion" class="question-editor">
+      <app-question-create 
+        [editQuestion]="selectedQuestion"
+        (questionCreated)="onQuestionCreated($event)"
+        (questionUpdated)="onQuestionUpdated($event)"
+        (cancel)="onCancelQuestion()">
+      </app-question-create>
+    </div>
+  
+    <!-- Liste des questions -->
+    <div *ngIf="!isCreatingQuestion" class="questions-container">
+      <!-- État de chargement -->
+      <div *ngIf="isLoading" class="loading-state">
+        <mat-icon class="loading-icon">hourglass_empty</mat-icon>
+        <p>Chargement des questions...</p>
+      </div>
+  
+      <!-- État vide -->
+      <div *ngIf="!isLoading && filteredQuestions.length === 0" class="empty-state">
+        <mat-icon class="empty-icon">help_outline</mat-icon>
+        <h2>Aucune question trouvée</h2>
+        <p *ngIf="searchQuery || selectedTypes.length > 0">Aucune question ne correspond à vos critères de recherche.</p>
+        <p *ngIf="!searchQuery && selectedTypes.length === 0">Commencez par créer votre première question.</p>
+        <button mat-raised-button color="primary" (click)="createQuestion()">
+          <mat-icon>add</mat-icon> Créer une question
+        </button>
+      </div>
+  
+      <!-- Liste des questions -->
+      <div *ngIf="!isLoading && filteredQuestions.length > 0" class="question-cards"
+           cdkDropList (cdkDropListDropped)="onDrop($event)">
+        <mat-card class="question-card" *ngFor="let question of filteredQuestions | slice:(pageIndex * pageSize):(pageIndex * pageSize) + pageSize"
+                  cdkDrag [cdkDragDisabled]="sortMode !== 'date'">
+          <div class="drag-handle" cdkDragHandle *ngIf="sortMode === 'date'">
+            <mat-icon>drag_indicator</mat-icon>
+          </div>
+          
+          <mat-card-header>
+            <div class="question-type-chip" [ngClass]="getTypeChipColor(question.type)">
+              {{ getQuestionTypeLabel(question.type) }}
+            </div>
+            <mat-card-title>{{ question.title }}</mat-card-title>
+            <mat-card-subtitle *ngIf="question.description">
+              {{ question.description | truncate:100:true }}
+            </mat-card-subtitle>
+          </mat-card-header>
+          
+          <mat-card-content>
+            <!-- Prévisualisation selon le type de question -->
+            <div class="question-preview" [ngSwitch]="question.type">
+              <!-- Questions à choix -->
+              <div *ngSwitchCase="'single_choice'" class="choice-preview">
+                <div class="choice-option" *ngFor="let option of question.options?.slice(0, 3)">
+                  <mat-icon>radio_button_unchecked</mat-icon>
+                  <span>{{ option.text }}</span>
+                </div>
+                <div class="more-options" *ngIf="question.options && question.options.length > 3">
+                  +{{ question.options.length - 3 }} autre(s) option(s)
+                </div>
+              </div>
+              
+              <!-- Questions à choix multiples -->
+              <div *ngSwitchCase="'multiple_choice'" class="choice-preview">
+                <div class="choice-option" *ngFor="let option of question.options?.slice(0, 3)">
+                  <mat-icon>check_box_outline_blank</mat-icon>
+                  <span>{{ option.text }}</span>
+                </div>
+                <div class="more-options" *ngIf="question.options && question.options.length > 3">
+                  +{{ question.options.length - 3 }} autre(s) option(s)
+                </div>
+              </div>
+              
+              <!-- Questions d'évaluation -->
+              <div *ngSwitchCase="'rating'" class="rating-preview">
+                <div class="rating-stars">
+                  <mat-icon *ngFor="let i of [1, 2, 3, 4, 5]" 
+                            [ngClass]="{'filled': i <= (question.settings?.maxValue || 5)}">
+                    star
+                  </mat-icon>
+                </div>
+                <span class="rating-scale">Échelle de {{ question.settings?.minValue || 1 }} à {{ question.settings?.maxValue || 5 }}</span>
+              </div>
+              
+              <!-- Questions texte -->
+              <div *ngSwitchCase="'text_short'" class="text-preview">
+                <div class="text-input-mock">
+                  <span class="placeholder">{{ question.settings?.placeholder || 'Réponse courte' }}</span>
+                </div>
+              </div>
+              
+              <!-- Questions texte long -->
+              <div *ngSwitchCase="'text_long'" class="text-preview">
+                <div class="textarea-mock">
+                  <span class="placeholder">{{ question.settings?.placeholder || 'Réponse longue' }}</span>
+                </div>
+              </div>
+              
+              <!-- Autres types de questions -->
+              <div *ngSwitchDefault class="default-preview">
+                <span class="preview-label">Question de type {{ getQuestionTypeLabel(question.type) }}</span>
+              </div>
+            </div>
+          </mat-card-content>
+          
+          <mat-divider></mat-divider>
+          
+          <mat-card-actions>
+            <button mat-button color="primary" (click)="editQuestion(question)" matTooltip="Modifier">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-button color="accent" (click)="duplicateQuestion(question)" matTooltip="Dupliquer">
+              <mat-icon>content_copy</mat-icon>
+            </button>
+            <button mat-button color="warn" (click)="deleteQuestion(question)" matTooltip="Supprimer">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </mat-card-actions>
+        </mat-card>
+      </div>
+  
+      <!-- Pagination -->
+      <mat-paginator 
+        *ngIf="!isLoading && filteredQuestions.length > pageSize"
+        [length]="filteredQuestions.length"
+        [pageSize]="pageSize"
+        [pageIndex]="pageIndex"
+        [pageSizeOptions]="pageSizeOptions"
+        (page)="onPageChange($event)">
+      </mat-paginator>
+    </div>
+  </div>

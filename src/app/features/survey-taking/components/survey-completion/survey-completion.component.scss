@@ -1,0 +1,192 @@
+@use 'sass:color';
+$primary-color: #3f51b5;
+$success-color: #4caf50;
+$secondary-color: #f5f5f5;
+$text-color: #333333;
+$text-secondary-color: #666666;
+$border-color: #e0e0e0;
+
+.survey-completion {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  
+  .completion-card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 40px;
+    text-align: center;
+    max-width: 600px;
+    width: 100%;
+    animation: slide-up 0.5s ease;
+    
+    .success-icon {
+      margin-bottom: 20px;
+      
+      i {
+        font-size: 64px;
+        color: $success-color;
+      }
+    }
+    
+    .completion-title {
+      font-size: 28px;
+      font-weight: 600;
+      color: $text-color;
+      margin: 0 0 20px 0;
+      font-family: 'Roboto', sans-serif;
+    }
+    
+    .thank-you-message {
+      font-size: 18px;
+      color: $text-color;
+      margin-bottom: 30px;
+      font-family: 'Open Sans', sans-serif;
+      line-height: 1.5;
+    }
+    
+    .completion-details {
+      background-color: $secondary-color;
+      padding: 15px;
+      border-radius: 4px;
+      margin-bottom: 30px;
+      
+      .survey-name {
+        font-size: 16px;
+        font-weight: 500;
+        color: $text-color;
+        margin: 0 0 10px 0;
+        font-family: 'Roboto', sans-serif;
+      }
+      
+      .completion-date {
+        font-size: 14px;
+        color: $text-secondary-color;
+        margin: 0;
+        font-family: 'Open Sans', sans-serif;
+      }
+    }
+    
+    .action-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 30px;
+      
+      button {
+        display: flex;
+        align-items: center;
+        padding: 10px 20px;
+        border-radius: 4px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-family: 'Roboto', sans-serif;
+        
+        i {
+          margin-right: 8px;
+        }
+        
+        &.btn-primary {
+          background-color: $primary-color;
+          color: white;
+          border: none;
+          
+          &:hover {
+            background-color: color.adjust($primary-color, $lightness: 10%);
+          }
+        }
+        
+        &.btn-outline {
+          background-color: transparent;
+          color: $text-secondary-color;
+          border: 1px solid $border-color;
+          
+          &:hover {
+            background-color: $secondary-color;
+          }
+        }
+      }
+    }
+    
+    .share-section {
+      border-top: 1px solid $border-color;
+      padding-top: 20px;
+      
+      p {
+        font-size: 14px;
+        color: $text-secondary-color;
+        margin: 0 0 15px 0;
+        font-family: 'Open Sans', sans-serif;
+      }
+      
+      .btn-share {
+        display: inline-flex;
+        align-items: center;
+        background-color: white;
+        border: 1px solid $border-color;
+        color: $text-color;
+        padding: 8px 15px;
+        border-radius: 4px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-family: 'Roboto', sans-serif;
+        
+        i {
+          margin-right: 8px;
+          color: #2196f3;
+        }
+        
+        &:hover {
+          background-color: $secondary-color;
+        }
+      }
+    }
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .survey-completion {
+    .completion-card {
+      padding: 30px 20px;
+      
+      .success-icon i {
+        font-size: 48px;
+      }
+      
+      .completion-title {
+        font-size: 24px;
+      }
+      
+      .thank-you-message {
+        font-size: 16px;
+      }
+      
+      .action-buttons {
+        flex-direction: column;
+        
+        button {
+          width: 100%;
+          justify-content: center;
+        }
+      }
+    }
+  }
+}
