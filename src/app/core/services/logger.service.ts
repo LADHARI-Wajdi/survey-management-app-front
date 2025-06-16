@@ -1,6 +1,6 @@
 // core/services/logger.service.ts
 import { Injectable } from '@angular/core';
-import { environment } from '../../../environments/environment';
+import { environements } from '../../../environements/environement';
 
 export enum LogLevel {
   DEBUG = 0,
@@ -13,13 +13,17 @@ export enum LogLevel {
   providedIn: 'root',
 })
 export class LoggerService {
+  static info(arg0: string) {
+    throw new Error('Method not implemented.');
+  }
   // Minimum level to show logs (configured based on environment)
-  private level: LogLevel = environment.production
+  private level: LogLevel = environements.production
     ? LogLevel.WARN
     : LogLevel.DEBUG;
 
   // Enable remote logging to a server API
-  private enableRemoteLogging: boolean = environment.production;
+  private enableRemoteLogging: boolean = environements
+  .production;
 
   // Maximum number of logs to keep in memory
   private maxLogsInMemory: number = 100;
@@ -44,7 +48,7 @@ export class LoggerService {
   /**
    * Log an info message
    */
-  info(message: string, data?: any): void {
+  info(message: string, data?: any, p0?: string): void {
     this.log(LogLevel.INFO, message, data);
   }
 
@@ -58,7 +62,7 @@ export class LoggerService {
   /**
    * Log an error message
    */
-  error(message: string, data?: any): void {
+  error(message: string, data?: any, p0?: string): void {
     this.log(LogLevel.ERROR, message, data);
   }
 
@@ -156,26 +160,8 @@ export class LoggerService {
     }
   }
 
-  /**
-   * Send log to remote server for monitoring
-   */
+
   private sendToRemoteServer(logEntry: any): void {
-    // In a real application, this would call an API endpoint
-    // to send logs to a remote server for monitoring
-    // Example implementation (commented out):
-    /*
-    const apiUrl = environment.logApiUrl;
-    
-    fetch(apiUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(logEntry),
-    }).catch(err => {
-      // Silent failure for logging service
-      console.error('Failed to send log to remote server', err);
-    });
-    */
+
   }
 }

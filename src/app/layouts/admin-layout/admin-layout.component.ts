@@ -4,24 +4,26 @@ import { Router, NavigationEnd, ActivatedRoute, Event, RouterModule } from '@ang
 import { filter, map, mergeMap } from 'rxjs/operators';
 import { Title } from '@angular/platform-browser';
 import { AuthService } from '../../core/authentication/services/auth.service';
-import { User } from '../../core/models/user.model';
+import { User, UserRole } from '../../core/models/user.model';
 import { SharedModule } from '../../shared/shared.module';
 import { CommonModule } from '@angular/common';
 import { LoaderComponent } from "../../shared/components/loader/loader.component";
 import { NotificationComponent } from "../../shared/components/notification/notification.component";
-Component({
+
+@Component({
   selector: 'app-admin-layout',
   templateUrl: './admin-layout.component.html',
+  styleUrls: ['./admin-layout.component.scss'],
+  standalone: true,
   imports: [
     CommonModule,
     RouterModule,
-    SharedModule,
     LoaderComponent,
+    SharedModule,
     NotificationComponent
-]
+  ]
 })
-
-export class  implements OnInit {
+export class AdminLayoutComponent implements OnInit {
   currentUser: User | null = null;
   isMenuCollapsed = false;
   activeRoute = '';
@@ -69,7 +71,7 @@ export class  implements OnInit {
       this.currentUser = user;
 
       // If user is not admin, redirect to home
-      if (user && !user.roles.includes('admin')) {
+      if (user && !user.roles.includes(UserRole.ADMIN)) {
         this.router.navigate(['/']);
       }
     });

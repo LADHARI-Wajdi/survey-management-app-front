@@ -1,1 +1,51 @@
-<p>line-chart works!</p>
+<!-- src/app/features/analytics/components/chart-components/line-chart/line-chart.component.html -->
+<div class="line-chart-container" [ngClass]="{ loading: isLoading }">
+    <div class="chart-header">
+      <h3 class="chart-title" *ngIf="title">{{ title }}</h3>
+      <div class="chart-actions">
+        <button class="btn-icon" (click)="refresh()" title="Actualiser">
+          <i class="material-icons">refresh</i>
+        </button>
+        <button class="btn-icon" (click)="downloadChart()" title="Télécharger">
+          <i class="material-icons">download</i>
+        </button>
+      </div>
+    </div>
+  
+    <div class="chart-content">
+      <!-- État de chargement -->
+      <div class="loading-spinner" *ngIf="isLoading">
+        <div class="spinner"></div>
+        <span>Chargement des données...</span>
+      </div>
+  
+      <!-- Message d'erreur -->
+      <div class="error-message" *ngIf="error">
+        <i class="material-icons">error</i>
+        <span>{{ error }}</span>
+      </div>
+  
+      <!-- Message pas de données -->
+     
+        <i class="material-icons">timeline</i>
+        <span>Aucune donnée disponible</span>
+      </div>
+  
+      <!-- Zone du graphique -->
+      <div class="chart-area">
+      </div>
+    </div>
+  
+    <!-- Légende -->
+    <div class="chart-legend" *ngIf="data && data.datasets">
+      <div class="legend-items">
+          <!-- Correction ici: utilisez String() pour convertir la couleur en chaîne -->
+        </div>
+      </div>
+    
+  
+    <!-- Note de bas de page -->
+    <div class="chart-footer" *ngIf="footnote">
+      <p class="footnote">{{ footnote }}</p>
+    </div>
+  

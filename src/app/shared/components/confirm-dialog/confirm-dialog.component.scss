@@ -1,4 +1,5 @@
-// shared/components/confirm-dialog/confirm-dialog.component.scss
+@use 'sass:color';
+
 .confirm-dialog-backdrop {
   position: fixed;
   top: 0;
@@ -100,7 +101,7 @@
           color: white;
 
           &:hover {
-            background-color: darken(#3f51b5, 10%);
+            background-color: color.adjust(#3f51b5, $lightness: -10%);
           }
         }
 
@@ -110,7 +111,7 @@
           color: white;
 
           &:hover {
-            background-color: darken(#f44336, 10%);
+            background-color: color.adjust(#f44336, $lightness: -10%);
           }
         }
 
@@ -120,7 +121,7 @@
           color: white;
 
           &:hover {
-            background-color: darken(#4caf50, 10%);
+            background-color: color.adjust(#4caf50, $lightness: -10%);
           }
         }
 
@@ -130,7 +131,7 @@
           color: white;
 
           &:hover {
-            background-color: darken(#ff9800, 10%);
+            background-color: color.adjust(#ff9800, $lightness: -10%);
           }
         }
       }

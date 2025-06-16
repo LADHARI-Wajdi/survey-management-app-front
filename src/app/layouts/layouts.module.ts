@@ -1,21 +1,23 @@
-// src/app/layouts/layout.module.ts (créez-le si nécessaire)
+// src/app/layouts/layouts.module.ts
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { SharedModule } from '../shared/shared.module';
-import { Component } from '@angular/core';
-
-@Component({
-  selector: 'app-main-layout',
-  templateUrl: './main-layout/main-layout.component.html',
-  styleUrls: ['./main-layout/main-layout.component.css'],
-})
-export class MainLayoutComponent {
-[x: string]: any;
-}
+import { MainLayoutComponent } from './main-layout/main-layout.component';
+import { AdminLayoutComponent } from './admin-layout/admin-layout.component';
+import { AuthLayoutComponent } from './auth-layout/auth-layout.component';
 
 @NgModule({
-  imports: [CommonModule, RouterModule, SharedModule],
+
+  imports: [
+    CommonModule,
+    RouterModule,
+    
+    MainLayoutComponent,
+    AdminLayoutComponent, 
+    AuthLayoutComponent,
+    
+  ],
 
 })
-export class LayoutsModule {}
+export class LayoutsModule { }

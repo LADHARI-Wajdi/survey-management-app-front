@@ -1,4 +1,4 @@
-// Variables
+@use 'sass:color';
 $primary-color: #3F51B5;
 $secondary-color: #FF4081;
 $accent-color: #00BCD4;
@@ -185,19 +185,29 @@ $border-color: #E0E0E0;
   margin-bottom: 30px;
   
   .qrcode-box {
-    width: 250px;
-    height: 250px;
+    width: 300px;
+    height: 300px;
     border: 1px solid $border-color;
-    border-radius: 4px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
     margin-bottom: 20px;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    
+    &:hover {
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
     
     .qrcode-image {
+      padding: 20px;
+      
       img {
         max-width: 100%;
         max-height: 100%;
+        border-radius: 4px;
       }
     }
     
@@ -206,12 +216,44 @@ $border-color: #E0E0E0;
       flex-direction: column;
       align-items: center;
       color: $text-secondary-color;
+      padding: 20px;
+      text-align: center;
       
       i {
-        font-size: 48px;
-        margin-bottom: 10px;
+        font-size: 64px;
+        margin-bottom: 16px;
+        color: rgba($primary-color, 0.2);
       }
       
+      p {
+        font-size: 14px;
+        font-family: 'Open Sans', sans-serif;
+        margin-bottom: 16px;
+      }
+
+      button {
+        margin-top: 8px;
+      }
+    }
+
+    .qrcode-loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: $text-secondary-color;
+      padding: 20px;
+      text-align: center;
+
+      .spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid rgba($primary-color, 0.1);
+        border-radius: 50%;
+        border-top-color: $primary-color;
+        animation: spin 1s linear infinite;
+        margin-bottom: 16px;
+      }
+
       p {
         font-size: 14px;
         font-family: 'Open Sans', sans-serif;
@@ -221,17 +263,42 @@ $border-color: #E0E0E0;
   
   .qrcode-actions {
     display: flex;
-    gap: 10px;
+    gap: 12px;
+    margin-bottom: 24px;
+
+    button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      font-size: 14px;
+      font-weight: 500;
+      border-radius: 4px;
+      transition: all 0.3s ease;
+
+      i {
+        font-size: 20px;
+      }
+
+      &:hover {
+        transform: translateY(-1px);
+      }
+    }
   }
   
   .qrcode-info {
+    width: 100%;
+    max-width: 600px;
     margin-top: 20px;
+    padding: 20px;
+    background-color: $background-color;
+    border-radius: 8px;
     
     h3 {
       font-size: 16px;
       font-weight: 500;
       color: $text-color;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
       font-family: 'Roboto', sans-serif;
     }
     
@@ -240,7 +307,43 @@ $border-color: #E0E0E0;
       color: $text-secondary-color;
       font-family: 'Open Sans', sans-serif;
       line-height: 1.6;
+      margin-bottom: 16px;
     }
+
+    .qrcode-stats {
+      display: flex;
+      gap: 16px;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid $border-color;
+
+      .stats-box {
+        background-color: white;
+        border-radius: 6px;
+        padding: 12px 16px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        
+        .stats-label {
+          font-size: 12px;
+          color: $text-secondary-color;
+          margin-bottom: 4px;
+          font-family: 'Roboto', sans-serif;
+        }
+        
+        .stats-value {
+          font-size: 18px;
+          font-weight: 500;
+          color: $primary-color;
+          font-family: 'Roboto', sans-serif;
+        }
+      }
+    }
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
 }
 
@@ -271,7 +374,7 @@ $border-color: #E0E0E0;
       border: none;
       
       &:hover {
-        background-color: darken($primary-color, 5%);
+        background-color: color.adjust($primary-color, $lightness: 5%);
       }
       
       i {
@@ -325,7 +428,7 @@ $border-color: #E0E0E0;
           background-color: #3b5998;
           
           &:hover {
-            background-color: darken(#3b5998, 5%);
+            background-color: color.adjust(#3b5998, $lightness: 5%);
           }
         }
         
@@ -333,7 +436,7 @@ $border-color: #E0E0E0;
           background-color: #1da1f2;
           
           &:hover {
-            background-color: darken(#1da1f2, 5%);
+            background-color: color.adjust(#1da1f2, $lightness: 5%);
           }
         }
         
@@ -341,7 +444,7 @@ $border-color: #E0E0E0;
           background-color: #0077b5;
           
           &:hover {
-            background-color: darken(#0077b5, 5%);
+            background-color: color.adjust(#0077b5, $lightness: 5%);
           }
         }
       }
@@ -459,11 +562,11 @@ $border-color: #E0E0E0;
     color: white;
     
     &:hover {
-      background-color: darken($primary-color, 5%);
+      background-color: color.adjust($primary-color, $lightness: 5%);
     }
     
     &:disabled {
-      background-color: lighten($primary-color, 20%);
+      background-color: color.adjust($primary-color, $lightness: 20%);
       cursor: not-allowed;
     }
   }
@@ -474,7 +577,7 @@ $border-color: #E0E0E0;
     color: $text-secondary-color;
     
     &:hover {
-      background-color: darken(white, 3%);
+      background-color: color.adjust(white,  $lightness: 5%);
     }
   }
 }

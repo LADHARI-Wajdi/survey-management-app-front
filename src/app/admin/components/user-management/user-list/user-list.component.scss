@@ -78,4 +78,70 @@
       opacity: 0.5;
     }
   }
+  /* Add this to your component's CSS */
+.users-table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.users-table .mat-column-actions {
+  width: 160px; /* Fixed width for actions column */
+  text-align: center;
+  padding: 0 8px;
+}
+
+.users-table .mat-column-actions button {
+  margin: 0 4px;
+  width: 36px;
+  height: 36px;
+  line-height: 36px;
+}
+
+.users-table .mat-column-actions button mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  line-height: 20px;
+}
+
+/* Column width distribution */
+.users-table .mat-column-username {
+  width: 15%;
+  padding-left: 12px;
+}
+
+.users-table .mat-column-email {
+  width: 25%;
+}
+
+.users-table .mat-column-role {
+  width: 15%;
+}
+
+.users-table .mat-column-createdAt {
+  width: 20%;
+}
+
+/* Role badges styling */
+.role-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.role-badge.participant {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.role-badge.investigateur {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.role-badge.administration {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+}
 }

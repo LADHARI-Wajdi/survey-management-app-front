@@ -1,0 +1,425 @@
+$text-secondary-color: #5f6368;
+@use 'sass:color';
+$primary-color: #3f51b5;
+$secondary-color: #ff4081;
+$accent-color: #00bcd4;
+$success-color: #4caf50;
+$warning-color: #ffc107;
+$danger-color: #f44336;
+$text-color: #333333;
+$text-secondary: #757575;
+$border-color: #e0e0e0;
+$background-color: #f5f7fa;
+
+.survey-list-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  .header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+
+    .page-title {
+      font-size: 24px;
+      font-weight: 500;
+      color: $text-color;
+      margin: 0;
+      font-family: 'Roboto', sans-serif;
+    }
+
+    .btn-primary {
+      display: flex;
+      align-items: center;
+      color: color.adjust($primary-color, $lightness: 10%);
+
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      font-family: 'Roboto', sans-serif;
+
+      i {
+        margin-right: 8px;
+      }
+
+      &:hover {
+      color: color.adjust($text-secondary-color, $lightness: 20%);
+
+      }
+    }
+  }
+
+  .filter-section {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    gap: 15px;
+
+    .search-box {
+      position: relative;
+      flex: 2;
+      min-width: 250px;
+
+      input {
+        width: 100%;
+        padding: 10px 40px 10px 15px;
+        border: 1px solid $border-color;
+        border-radius: 4px;
+        font-size: 14px;
+        transition: border-color 0.2s;
+        font-family: 'Open Sans', sans-serif;
+
+        &:focus {
+          border-color: $primary-color;
+          outline: none;
+        }
+      }
+
+      button {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: $text-secondary;
+        cursor: pointer;
+      }
+    }
+
+    .filter-options {
+      display: flex;
+      gap: 15px;
+      flex: 1;
+      justify-content: flex-end;
+
+      .filter-group {
+        display: flex;
+        align-items: center;
+        min-width: 150px;
+
+        label {
+          margin-right: 10px;
+          font-size: 14px;
+          color: $text-secondary;
+          white-space: nowrap;
+          font-family: 'Roboto', sans-serif;
+        }
+
+        select {
+          padding: 8px 10px;
+          border: 1px solid $border-color;
+          border-radius: 4px;
+          font-size: 14px;
+          background-color: white;
+          font-family: 'Open Sans', sans-serif;
+
+          &:focus {
+            border-color: $primary-color;
+            outline: none;
+          }
+        }
+      }
+    }
+  }
+
+  .surveys-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+
+    .survey-card {
+      position: relative;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s, box-shadow 0.2s;
+      overflow: hidden;
+
+      &:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+      }
+
+      .survey-status {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        padding: 4px 8px;
+        border-radius: 3px;
+        font-size: 12px;
+        font-weight: 500;
+        font-family: 'Roboto', sans-serif;
+
+        &.status-draft {
+          background-color: rgba($text-secondary, 0.1);
+          color: $text-secondary;
+        }
+
+        &.status-published {
+          background-color: rgba($success-color, 0.1);
+          color: $success-color;
+        }
+
+        &.status-closed {
+          background-color: rgba($warning-color, 0.1);
+          color: $warning-color;
+        }
+      }
+
+      .survey-header {
+        padding: 15px;
+        border-bottom: 1px solid $border-color;
+
+        .survey-title {
+          font-size: 18px;
+          font-weight: 500;
+          color: $text-color;
+          margin-bottom: 5px;
+          margin-right: 70px; // Leave space for status badge
+          font-family: 'Roboto', sans-serif;
+        }
+
+        .survey-date {
+          font-size: 13px;
+          color: $text-secondary;
+          font-family: 'Open Sans', sans-serif;
+        }
+      }
+
+      .survey-content {
+        padding: 15px;
+
+        .survey-description {
+          font-size: 14px;
+          color: $text-secondary;
+          margin-bottom: 15px;
+          line-height: 1.5;
+          min-height: 40px;
+          font-family: 'Open Sans', sans-serif;
+        }
+
+        .survey-stats {
+          display: flex;
+          justify-content: space-between;
+
+          .stat-item {
+            display: flex;
+            align-items: center;
+            font-size: 13px;
+            color: $text-secondary;
+            font-family: 'Open Sans', sans-serif;
+
+            i {
+              margin-right: 5px;
+              color: $primary-color;
+            }
+          }
+        }
+      }
+
+      .survey-actions {
+        padding: 10px 15px;
+        border-top: 1px solid $border-color;
+        background-color: #fafafa;
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+
+        .btn-icon {
+          width: 32px;
+          height: 32px;
+          border-radius: 4px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: none;
+          cursor: pointer;
+          transition: background-color 0.2s;
+
+          &.btn-primary {
+            background-color: $primary-color;
+            color: white;
+
+            &:hover {
+              background-color: color.adjust($primary-color, $lightness: 10%);
+            }
+          }
+
+          &.btn-secondary {
+            background-color: $secondary-color;
+            color: white;
+
+            &:hover {
+              background-color: color.adjust($secondary-color, $lightness: 10%);
+            }
+          }
+
+          &.btn-accent {
+            background-color: $accent-color;
+            color: white;
+
+            &:hover {
+              background-color: color.adjust($accent-color, $lightness: -10%);            }
+          }
+
+          &.btn-success {
+            background-color: $success-color;
+            color: white;
+
+            &:hover {
+              background-color: color.adjust($success-color, $lightness: -10%);            }
+          }
+
+          &.btn-danger {
+            background-color: $danger-color;
+            color: white;
+
+            &:hover {
+              background-color: color.adjust($danger-color, $lightness: -10%);            }
+          }
+        }
+      }
+    }
+  }
+
+  .loader-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 0;
+
+    .spinner {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 15px;
+
+      > div {
+        width: 12px;
+        height: 12px;
+        margin: 0 5px;
+        background-color: $primary-color;
+        border-radius: 100%;
+        display: inline-block;
+        animation: sk-bouncedelay 1.4s infinite ease-in-out both;
+      }
+
+      .bounce1 {
+        animation-delay: -0.32s;
+      }
+
+      .bounce2 {
+        animation-delay: -0.16s;
+      }
+    }
+
+    .loader-text {
+      font-size: 16px;
+      color: $text-secondary;
+      font-family: 'Roboto', sans-serif;
+    }
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 0;
+
+    .empty-icon {
+      color: #ccc;
+      margin-bottom: 20px;
+    }
+
+    h3 {
+      font-size: 20px;
+      font-weight: 500;
+      color: $text-color;
+      margin-bottom: 10px;
+      font-family: 'Roboto', sans-serif;
+    }
+
+    p {
+      font-size: 16px;
+      color: $text-secondary;
+      margin-bottom: 20px;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+      font-family: 'Open Sans', sans-serif;
+
+      a {
+        color: $primary-color;
+        text-decoration: none;
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+
+    .btn-primary {
+      background-color: $primary-color;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      font-family: 'Roboto', sans-serif;
+
+      &:hover {
+        background-color: color.adjust($primary-color, $lightness: -10%);      }
+    }
+  }
+}
+
+@keyframes sk-bouncedelay {
+  0%, 80%, 100% { 
+    transform: scale(0);
+  } 40% { 
+    transform: scale(1.0);
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .survey-list-container {
+    .header-section {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 15px;
+
+      .page-title {
+        margin-bottom: 0;
+      }
+    }
+
+    .filter-section {
+      flex-direction: column;
+
+      .search-box {
+        width: 100%;
+      }
+
+      .filter-options {
+        width: 100%;
+        justify-content: space-between;
+      }
+    }
+
+    .surveys-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+}

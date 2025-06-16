@@ -1,0 +1,148 @@
+<!-- features/dashboard/investigator-dashboard/investigator-dashboard.component.html -->
+<div class="investigator-dashboard">
+  <div class="dashboard-header">
+    <div class="welcome-section">
+      <h1>Bienvenue, {{ currentUser?.firstName || 'Investigateur' }} !</h1>
+      <p class="subtitle">Gérez vos enquêtes et suivez les résultats en temps réel</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-primary" (click)="createNewSurvey()">
+        <i class="fa fa-plus"></i> Nouvelle enquête
+      </button>
+    </div>
+  </div>
+
+  <!-- Statistiques -->
+  <div class="stats-container">
+    <div class="stat-card">
+      <div class="stat-icon surveys-icon">
+        <i class="fa fa-clipboard-list"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-title">Total enquêtes</div>
+        <div class="stat-value">{{ stats.totalSurveys }}</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon active-icon">
+        <i class="fa fa-play-circle"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-title">Enquêtes actives</div>
+        <div class="stat-value">{{ stats.activeSurveys }}</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon responses-icon">
+        <i class="fa fa-reply-all"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-title">Réponses totales</div>
+        <div class="stat-value">{{ stats.totalResponses }}</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon completion-icon">
+        <i class="fa fa-chart-pie"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-title">Taux de complétion</div>
+        <div class="stat-value">{{ stats.averageCompletionRate }}%</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenu principal -->
+  <div class="dashboard-content">
+    <!-- Colonne de gauche: Liste des enquêtes -->
+    <div class="surveys-section">
+      <div class="section-header">
+        <h2 class="section-title">Mes enquêtes</h2>
+        <div class="section-actions">
+          <button class="btn btn-outline" routerLink="/surveys">
+            Voir toutes
+          </button>
+        </div>
+      </div>
+
+      <div class="surveys-list">
+        <div class="survey-item" *ngFor="let survey of recentSurveys">
+          <div class="survey-info">
+            <h3 class="survey-title">{{ survey.title }}</h3>
+            <span class="survey-date">Créée le {{ survey.creationDate | date:'dd/MM/yyyy' }}</span>
+          </div>
+          
+          <div class="survey-stats">
+            <div class="stat">
+              <span class="stat-label">Réponses</span>
+              <span class="stat-value">{{ survey.responses }}</span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">Taux</span>
+              <span class="stat-value">{{ survey.completionRate }}%</span>
+            </div>
+          </div>
+          
+          <div class="survey-status">
+            <span [ngClass]="getSurveyStatusClass(survey.status)">
+              {{ getSurveyStatusLabel(survey.status) }}
+            </span>
+          </div>
+          
+          <div class="survey-actions">
+            <button class="btn-icon" (click)="editSurvey(survey.id)" title="Modifier l'enquête">
+              <i class="fa fa-edit"></i>
+            </button>
+            <button class="btn-icon" [disabled]="survey.status === 'draft'" 
+                    (click)="viewResults(survey.id)" title="Voir les résultats">
+              <i class="fa fa-chart-bar"></i>
+            </button>
+            <button class="btn-icon" [disabled]="survey.status !== 'published'" 
+                    (click)="distributeSurvey(survey.id)" title="Distribuer l'enquête">
+              <i class="fa fa-share-alt"></i>
+            </button>
+          </div>
+        </div>
+        
+        <!-- État vide -->
+        <div class="empty-state" *ngIf="recentSurveys.length === 0">
+          <div class="empty-icon">
+            <i class="fa fa-clipboard-list"></i>
+          </div>
+          <h3>Aucune enquête</h3>
+          <p>Vous n'avez pas encore créé d'enquête. Commencez par en créer une nouvelle.</p>
+          <button class="btn btn-primary" (click)="createNewSurvey()">
+            Créer une enquête
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Colonne de droite: Activité récente -->
+    <div class="activity-section">
+      <div class="section-header">
+        <h2 class="section-title">Activité récente</h2>
+      </div>
+      
+      <div class="activity-list">
+        <div class="activity-item" *ngFor="let activity of recentActivity">
+          <div class="activity-icon">
+            <i class="fa" [ngClass]="getActivityIcon(activity.type)"></i>
+          </div>
+          <div class="activity-content">
+            <p class="activity-message">{{ activity.message }}</p>
+            <span class="activity-time">{{ activity.time }}</span>
+          </div>
+        </div>
+        
+        <!-- État vide -->
+        <div class="empty-state" *ngIf="recentActivity.length === 0">
+          <p>Aucune activité récente à afficher</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

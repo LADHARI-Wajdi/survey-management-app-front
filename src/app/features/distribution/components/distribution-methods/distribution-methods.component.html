@@ -168,13 +168,20 @@
           <div class="qrcode-image" *ngIf="qrCodeDataUrl">
             <img [src]="qrCodeDataUrl" alt="QR Code pour l'enquête" />
           </div>
-          <div class="qrcode-placeholder" *ngIf="!qrCodeDataUrl">
+          <div class="qrcode-placeholder" *ngIf="!qrCodeDataUrl && !isGeneratingQR">
             <i class="material-icons">qr_code</i>
-            <p>QR Code en cours de génération...</p>
+            <p>Cliquez sur le bouton ci-dessous pour générer le QR code</p>
+            <button class="btn btn-primary" (click)="generateQrCode()">
+              <i class="material-icons">add</i> Générer le QR code
+            </button>
+          </div>
+          <div class="qrcode-loading" *ngIf="isGeneratingQR">
+            <div class="spinner"></div>
+            <p>Génération du QR code en cours...</p>
           </div>
         </div>
 
-        <div class="qrcode-actions">
+        <div class="qrcode-actions" *ngIf="qrCodeDataUrl">
           <button class="btn btn-primary" (click)="downloadQrCode()">
             <i class="material-icons">download</i> Télécharger
           </button>
@@ -191,6 +198,12 @@
           des écrans. Les participants pourront scanner le code avec leur
           smartphone pour accéder directement à l'enquête.
         </p>
+        <div class="qrcode-stats" *ngIf="distributionStats">
+          <div class="stats-box">
+            <span class="stats-label">Scans du QR code</span>
+            <span class="stats-value">{{ distributionStats.qrCodeScans || 0 }}</span>
+          </div>
+        </div>
       </div>
     </div>
 

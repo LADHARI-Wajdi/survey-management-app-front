@@ -1,0 +1,648 @@
+@use 'sass:color';
+$primary-color: #3f51b5;
+$secondary-color: #ff4081;
+$accent-color: #00bcd4;
+$success-color: #4caf50;
+$warning-color: #ffc107;
+$danger-color: #f44336;
+$text-color: #333333;
+$text-secondary: #757575;
+$border-color: #e0e0e0;
+$background-color: #f5f7fa;
+
+.survey-detail-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+
+  .header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 25px;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .title-section {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+
+      .page-title {
+        font-size: 24px;
+        font-weight: 500;
+        color: $text-color;
+        margin: 0;
+        font-family: 'Roboto', sans-serif;
+      }
+
+      .status-badge {
+        padding: 5px 10px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 500;
+        font-family: 'Roboto', sans-serif;
+
+        &.status-draft {
+          background-color: rgba($text-secondary, 0.1);
+          color: $text-secondary;
+        }
+
+        &.status-published {
+          background-color: rgba($success-color, 0.1);
+          color: $success-color;
+        }
+
+        &.status-closed {
+          background-color: rgba($warning-color, 0.1);
+          color: $warning-color;
+        }
+      }
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+
+      .btn {
+        display: flex;
+        align-items: center;
+        padding: 8px 12px;
+        border-radius: 4px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        font-family: 'Roboto', sans-serif;
+        border: none;
+        transition: background-color 0.2s;
+
+        i {
+          margin-right: 8px;
+        }
+
+        &.btn-primary {
+          background-color: $primary-color;
+          color: white;
+
+          &:hover {
+            background-color: color.adjust($primary-color, $lightness: -10%);
+          }
+        }
+
+        &.btn-secondary {
+          background-color: #f2f2f2;
+          color: $text-color;
+
+          &:hover {
+            background-color: color.adjust(#f2f2f2, $lightness: 5%);          }
+        }
+
+        &.btn-accent {
+          background-color: $accent-color;
+          color: white;
+
+          &:hover {
+            background-color: color.adjust($accent-color, $lightness: -10%);
+          }
+        }
+
+        &.btn-success {
+          background-color: $success-color;
+          color: white;
+
+          &:hover {
+            background-color: color.adjust($success-color, $lightness: -10%);
+          }
+        }
+
+        &.btn-outline {
+          background-color: transparent;
+          border: 1px solid $border-color;
+          color: $text-secondary;
+
+          &:hover {
+            background-color: #f2f2f2;
+          }
+        }
+
+        &.btn-icon-only {
+          width: 36px;
+          height: 36px;
+          padding: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background-color: transparent;
+          border: 1px solid $border-color;
+
+          i {
+            margin-right: 0;
+          }
+
+          &:hover {
+            background-color: #f2f2f2;
+          }
+        }
+      }
+
+      .dropdown {
+        position: relative;
+
+        .dropdown-menu {
+          position: absolute;
+          top: 100%;
+          right: 0;
+          background-color: white;
+          border-radius: 4px;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+          min-width: 160px;
+          z-index: 10;
+          display: none;
+
+          &.show {
+            display: block;
+          }
+
+          .dropdown-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            font-size: 14px;
+            color: $text-color;
+            text-decoration: none;
+            cursor: pointer;
+            font-family: 'Roboto', sans-serif;
+
+            i {
+              margin-right: 8px;
+              width: 16px;
+              text-align: center;
+            }
+
+            &:hover {
+              background-color: #f5f5f5;
+            }
+
+            &.text-danger {
+              color: $danger-color;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .info-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 15px;
+    margin-bottom: 25px;
+
+    .info-card {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+      padding: 15px;
+      display: flex;
+      align-items: center;
+
+      .card-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        background-color: rgba($primary-color, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+
+        i {
+          color: $primary-color;
+          font-size: 20px;
+        }
+      }
+
+      .card-content {
+        .card-label {
+          font-size: 13px;
+          color: $text-secondary;
+          margin-bottom: 5px;
+          font-family: 'Roboto', sans-serif;
+        }
+
+        .card-value {
+          font-size: 18px;
+          font-weight: 500;
+          color: $text-color;
+          font-family: 'Roboto', sans-serif;
+        }
+      }
+    }
+  }
+
+  .survey-description {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    padding: 20px;
+    margin-bottom: 25px;
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 500;
+      color: $text-color;
+      margin-top: 0;
+      margin-bottom: 15px;
+      font-family: 'Roboto', sans-serif;
+    }
+
+    p {
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.6;
+      color: $text-secondary;
+      font-family: 'Open Sans', sans-serif;
+    }
+  }
+
+  .questions-section {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    padding: 20px;
+    margin-bottom: 25px;
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 500;
+      color: $text-color;
+      margin-top: 0;
+      margin-bottom: 20px;
+      font-family: 'Roboto', sans-serif;
+    }
+
+    .questions-list {
+      .section-header {
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid $border-color;
+
+        .section-title {
+          font-size: 16px;
+          font-weight: 500;
+          color: $text-color;
+          margin: 0 0 5px 0;
+          font-family: 'Roboto', sans-serif;
+        }
+
+        p {
+          margin: 0;
+          font-size: 14px;
+          color: $text-secondary;
+          font-family: 'Open Sans', sans-serif;
+        }
+      }
+
+      .question-card {
+        display: flex;
+        margin-bottom: 20px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid $border-color;
+
+        &:last-child {
+          margin-bottom: 0;
+          padding-bottom: 0;
+          border-bottom: none;
+        }
+
+        .question-number {
+          width: 36px;
+          height: 36px;
+          border-radius: 50%;
+          background-color: rgba($primary-color, 0.1);
+          color: $primary-color;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 500;
+          font-size: 14px;
+          margin-right: 15px;
+          flex-shrink: 0;
+          font-family: 'Roboto', sans-serif;
+        }
+
+        .question-content {
+          flex: 1;
+
+          .question-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 10px;
+
+            .question-title {
+              font-size: 16px;
+              font-weight: 500;
+              color: $text-color;
+              margin: 0;
+              font-family: 'Roboto', sans-serif;
+              flex: 1;
+            }
+
+            .question-badge {
+              padding: 3px 8px;
+              border-radius: 3px;
+              font-size: 12px;
+              font-weight: 400;
+              font-family: 'Roboto', sans-serif;
+
+              &.type-text_short,
+              &.type-text_long {
+                background-color: rgba($accent-color, 0.1);
+                color: $accent-color;
+              }
+
+              &.type-single_choice,
+              &.type-multiple_choice {
+                background-color: rgba($primary-color, 0.1);
+                color: $primary-color;
+              }
+
+              &.type-rating {
+                background-color: rgba($secondary-color, 0.1);
+                color: $secondary-color;
+              }
+
+              &.type-date {
+                background-color: rgba($success-color, 0.1);
+                color: $success-color;
+              }
+
+              &.type-file {
+                background-color: rgba($warning-color, 0.1);
+                color: $warning-color;
+              }
+            }
+          }
+
+          .question-description {
+            font-size: 14px;
+            color: $text-secondary;
+            margin: 0 0 15px 0;
+            line-height: 1.5;
+            font-family: 'Open Sans', sans-serif;
+          }
+
+          .question-details {
+            margin-bottom: 10px;
+
+            .options-list {
+              .option-item {
+                display: flex;
+                align-items: center;
+                margin-bottom: 10px;
+
+                &:last-child {
+                  margin-bottom: 0;
+                }
+
+                .option-marker {
+                  width: 18px;
+                  height: 18px;
+                  border-radius: 50%;
+                  border: 2px solid $border-color;
+                  margin-right: 10px;
+                }
+
+                .option-text {
+                  font-size: 14px;
+                  color: $text-color;
+                  font-family: 'Open Sans', sans-serif;
+                }
+              }
+
+              &.multiple {
+                .option-marker {
+                  border-radius: 3px;
+                }
+              }
+            }
+
+            .rating-preview {
+              .rating-stars {
+                display: flex;
+                gap: 5px;
+
+                i {
+                  color: $warning-color;
+                  font-size: 20px;
+                }
+              }
+            }
+
+            .text-preview,
+            .date-preview,
+            .file-preview {
+              .text-field,
+              .date-field,
+              .file-field {
+                padding: 10px;
+                background-color: #f5f5f5;
+                border: 1px solid $border-color;
+                border-radius: 4px;
+                color: $text-secondary;
+                font-size: 14px;
+                font-family: 'Open Sans', sans-serif;
+              }
+
+              &.long .text-field {
+                min-height: 80px;
+              }
+
+              .file-field {
+                display: inline-block;
+              }
+            }
+          }
+
+          .question-required {
+            font-size: 13px;
+            color: $secondary-color;
+            font-style: italic;
+            font-family: 'Open Sans', sans-serif;
+          }
+        }
+      }
+    }
+  }
+
+  .survey-settings {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    padding: 20px;
+    margin-bottom: 25px;
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 500;
+      color: $text-color;
+      margin-top: 0;
+      margin-bottom: 20px;
+      font-family: 'Roboto', sans-serif;
+    }
+
+    .settings-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 15px;
+
+      .setting-item {
+        .setting-name {
+          font-size: 14px;
+          color: $text-secondary;
+          margin-bottom: 5px;
+          font-family: 'Roboto', sans-serif;
+        }
+
+        .setting-value {
+          font-size: 15px;
+          font-weight: 500;
+          color: $text-color;
+          font-family: 'Roboto', sans-serif;
+        }
+      }
+    }
+  }
+
+  .thank-you-message {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    padding: 20px;
+    margin-bottom: 25px;
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 500;
+      color: $text-color;
+      margin-top: 0;
+      margin-bottom: 15px;
+      font-family: 'Roboto', sans-serif;
+    }
+
+    .message-preview {
+      padding: 15px;
+      background-color: #f8f9fa;
+      border: 1px solid $border-color;
+      border-radius: 8px;
+      font-size: 15px;
+      line-height: 1.6;
+      color: $text-color;
+      font-family: 'Open Sans', sans-serif;
+    }
+  }
+}
+
+.loader-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100px 0;
+
+  .spinner {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 15px;
+
+    > div {
+      width: 12px;
+      height: 12px;
+      margin: 0 5px;
+      background-color: $primary-color;
+      border-radius: 100%;
+      display: inline-block;
+      animation: sk-bouncedelay 1.4s infinite ease-in-out both;
+    }
+
+    .bounce1 {
+      animation-delay: -0.32s;
+    }
+
+    .bounce2 {
+      animation-delay: -0.16s;
+    }
+  }
+
+  .loader-text {
+    font-size: 16px;
+    color: $text-secondary;
+    font-family: 'Roboto', sans-serif;
+  }
+}
+
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 0;
+  text-align: center;
+
+  .error-icon {
+    font-size: 48px;
+    color: $warning-color;
+    margin-bottom: 20px;
+  }
+
+  h2 {
+    font-size: 24px;
+    font-weight: 500;
+    color: $text-color;
+    margin-bottom: 15px;
+    font-family: 'Roboto', sans-serif;
+  }
+
+  p {
+    font-size: 16px;
+    color: $text-secondary;
+    margin-bottom: 25px;
+    max-width: 500px;
+    font-family: 'Open Sans', sans-serif;
+  }
+
+  .btn-primary {
+    background-color: $primary-color;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-family: 'Roboto', sans-serif;
+
+    &:hover {
+      background-color: color.adjust($primary-color, $lightness: 10%);
+    }
+  }
+}
+
+@keyframes sk-bouncedelay {
+  0%,
+  80%,
+  100% {
+    transform: scale(0);
+  }
+  40% {
+    transform: scale(1);
+  }
+}

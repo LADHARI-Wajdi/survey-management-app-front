@@ -6,8 +6,10 @@ import {
   Validators,
   AbstractControl,
   ValidationErrors,
+  ReactiveFormsModule,
 } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { CommonModule } from '@angular/common';
 import { AuthService } from '../services/auth.service';
 import { NotificationService } from '../../services/notification.service';
 
@@ -15,18 +17,20 @@ import { NotificationService } from '../../services/notification.service';
   selector: 'app-reset-password',
   templateUrl: './reset-password.component.html',
   styleUrls: ['./reset-password.component.scss'],
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, RouterModule],
 })
 export class ResetPasswordComponent implements OnInit {
-  resetpassword: FormGroup = new FormGroup({});
+  resetPasswordForm: FormGroup;
   loading = false;
   submitted = false;
   token: string;
   error = '';
   resetSuccess = false;
-  resetPasswordForm: any;
+  subscribe: any;
 
   constructor(
-    private formBuilder: FormBuilder,
+    private fb: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
     private authService: AuthService,
@@ -39,10 +43,9 @@ export class ResetPasswordComponent implements OnInit {
     if (!this.token) {
       this.router.navigate(['/auth/forgot-password']);
     }
-  }
 
-  ngOnInit() {
-    this.resetPasswordForm = this.formBuilder.group(
+    // Initialize form
+    this.resetPasswordForm = this.fb.group(
       {
         password: [
           '',
@@ -58,6 +61,10 @@ export class ResetPasswordComponent implements OnInit {
         validators: this.passwordMatchValidator,
       }
     );
+  }
+
+  ngOnInit() {
+    // Form is already initialized in the constructor
   }
 
   // convenience getter for easy access to form fields
@@ -112,21 +119,7 @@ export class ResetPasswordComponent implements OnInit {
     this.loading = true;
     this.error = '';
 
-    this.authService.resetPassword(this.token, this.resetPasswordForm?.get('password')?.value).subscribe(
-      (response) => {
-        this.loading = false;
-        this.resetSuccess = true;
-        this.notificationService.success(
-          'Votre mot de passe a été réinitialisé avec succès.'
-        );
-      },
-      (error) => {
-        this.error =
-          error.message ||
-          'Une erreur est survenue lors de la réinitialisation du mot de passe.';
-        this.loading = false;
-      }
-    );
+
   }
 
   navigateToLogin() {

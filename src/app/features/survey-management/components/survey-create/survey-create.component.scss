@@ -1,4 +1,4 @@
-// Variables
+@use 'sass:color';
 $primary-color: #3f51b5;
 $secondary-color: #ff4081;
 $accent-color: #00bcd4;
@@ -141,8 +141,7 @@ $border-color: #e0e0e0;
       }
 
       &::placeholder {
-        color: lighten($text-secondary-color, 20%);
-      }
+        color: color.adjust($text-secondary-color, $lightness: 20%);      }
     }
 
     textarea.form-control {
@@ -454,7 +453,8 @@ $border-color: #e0e0e0;
       color: white;
 
       &:hover {
-        background-color: darken($primary-color, 5%);
+        
+        background-color: color.adjust($primary-color, $lightness: 5%);
       }
     }
 
@@ -464,8 +464,7 @@ $border-color: #e0e0e0;
       color: $text-secondary-color;
 
       &:hover {
-        background-color: darken(white, 3%);
-      }
+        background-color: color.adjust(white, $lightness: -3%);      }
     }
 
     &.btn-success {
@@ -473,7 +472,7 @@ $border-color: #e0e0e0;
       color: white;
 
       &:hover {
-        background-color: darken($success-color, 5%);
+        background-color: color.adjust($success-color, $lightness: 5%);
       }
     }
   }

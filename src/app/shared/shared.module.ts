@@ -13,6 +13,7 @@ import { HeaderComponent } from './components/header/header.component';
 import { FooterComponent } from './components/footer/footer.component';
 import { SidebarComponent } from './components/sidebar/sidebar.component';
 import { ModalComponent } from './components/modal/modal.component';
+import { AdminNavbarComponent } from './components/admin-navbar/admin-navbar.component';
 
 // Directives
 import { ClickOutsideDirective } from './directives/click-outside.directive';
@@ -25,17 +26,56 @@ import { FilterPipe } from './pipes/filter.pipe';
 import { TruncatePipe } from './pipes/truncate.pipe';
 
 @NgModule({
- 
-
-  imports: [CommonModule, RouterModule, FormsModule, ReactiveFormsModule],
+  imports: [
+    CommonModule, 
+    RouterModule, 
+    FormsModule, 
+    ReactiveFormsModule,
+    
+    // Import standalone components, directives, and pipes
+    LoaderComponent,
+    NotificationComponent,
+    ConfirmDialogComponent,
+    DataTableComponent,
+    HeaderComponent,
+    FooterComponent,
+    SidebarComponent,
+    ModalComponent,
+    AdminNavbarComponent,
+    
+    ClickOutsideDirective,
+    DebounceClickDirective,
+    PermissionDirective,
+    
+    DateFormatPipe,
+    FilterPipe,
+    TruncatePipe
+  ],
   exports: [
     // Modules
     CommonModule,
     RouterModule,
     FormsModule,
     ReactiveFormsModule,
-
     
+    // Re-export the standalone components, directives, and pipes
+    LoaderComponent,
+    NotificationComponent,
+    ConfirmDialogComponent,
+    DataTableComponent,
+    HeaderComponent,
+    FooterComponent,
+    SidebarComponent,
+    ModalComponent,
+    AdminNavbarComponent,
+    
+    ClickOutsideDirective,
+    DebounceClickDirective,
+    PermissionDirective,
+    
+    DateFormatPipe,
+    FilterPipe,
+    TruncatePipe
   ],
 })
 export class SharedModule {}

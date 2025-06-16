@@ -32,23 +32,17 @@ export class ThemeService {
     this.initTheme();
   }
 
-  /**
-   * Initialize theme settings on app startup
-   */
   private initTheme(): void {
     const settings = this.getStoredSettings();
     this.applyTheme(settings);
     this.themeSubject.next(settings);
 
-    // Listen for system preference changes if in system mode
     if (settings.mode === 'system') {
       this.listenForSystemThemeChanges();
     }
   }
 
-  /**
-   * Get stored theme settings or return defaults
-   */
+
   private getStoredSettings(): ThemeSettings {
     try {
       const storedSettings = localStorage.getItem(this.STORAGE_KEY);
@@ -61,20 +55,15 @@ export class ThemeService {
     }
   }
 
-  /**
-   * Update theme settings
-   */
+
   updateTheme(settings: Partial<ThemeSettings>): void {
     const currentSettings = this.themeSubject.value;
     const newSettings = { ...currentSettings, ...settings };
 
-    // Store in localStorage
     localStorage.setItem(this.STORAGE_KEY, JSON.stringify(newSettings));
 
-    // Apply the theme
     this.applyTheme(newSettings);
 
-    // If changing mode to/from system, handle system preference listener
     if (settings.mode && settings.mode !== currentSettings.mode) {
       if (settings.mode === 'system') {
         this.listenForSystemThemeChanges();
@@ -83,34 +72,25 @@ export class ThemeService {
       }
     }
 
-    // Update the subject
     this.themeSubject.next(newSettings);
   }
 
-  /**
-   * Apply theme settings to document
-   */
+
   private applyTheme(settings: ThemeSettings): void {
     const { mode, color, fontSize } = settings;
     const root = document.documentElement;
 
-    // Apply theme mode
     const effectiveMode = mode === 'system' ? this.getSystemPreference() : mode;
 
     root.setAttribute('data-theme', effectiveMode);
 
-    // Apply theme color
     root.setAttribute('data-theme-color', color);
 
-    // Apply font size
     root.style.fontSize = `${fontSize}px`;
 
-    // Additional theme-specific CSS variables could be set here
   }
 
-  /**
-   * Get system color scheme preference
-   */
+
   private getSystemPreference(): 'light' | 'dark' {
     return window.matchMedia('(prefers-color-scheme: dark)').matches
       ? 'dark'

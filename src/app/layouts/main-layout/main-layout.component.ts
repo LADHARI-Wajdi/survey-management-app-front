@@ -4,23 +4,27 @@ import { Router, NavigationEnd, ActivatedRoute, Event, RouterModule } from '@ang
 import { filter, map, mergeMap } from 'rxjs/operators';
 import { Title } from '@angular/platform-browser';
 import { AuthService } from '../../core/authentication/services/auth.service';
-import { User } from '../../core/models/user.model';
+import { User, UserRole } from '../../core/models/user.model';
 import { NotificationService } from '../../core/services/notification.service';
 import { CommonModule } from '@angular/common';
-import { SharedModule } from '../../shared/shared.module';
 import { LoaderComponent } from "../../shared/components/loader/loader.component";
 import { NotificationComponent } from "../../shared/components/notification/notification.component";
+import { SharedModule } from '../../shared/shared.module';
+import { SidebarComponent } from '../../shared/components/sidebar/sidebar.component';
 
 @Component({
   selector: 'app-main-layout',
   templateUrl: './main-layout.component.html',
+  styleUrls: ['./main-layout.component.scss'],
+  standalone: true,
   imports: [
     CommonModule,
     RouterModule,
     SharedModule,
     LoaderComponent,
-    NotificationComponent
-]
+    NotificationComponent,
+    SidebarComponent
+  ]
 })
 export class MainLayoutComponent implements OnInit {
   currentUser: User | null = null;
@@ -29,6 +33,7 @@ export class MainLayoutComponent implements OnInit {
   pageTitle = '';
   notificationsCount = 0;
   currentYear = new Date().getFullYear();
+
 
   constructor(
     private authService: AuthService,
@@ -83,9 +88,20 @@ export class MainLayoutComponent implements OnInit {
   logout(): void {
     this.authService.logout();
   }
+getUserRoleDisplay(): string {
+    if (!this.currentUser) return '';
+    
+    if (this.currentUser.roles.includes(UserRole.ADMIN)) {
+      return 'Administrateur';
+    } else if (this.currentUser.roles.includes(UserRole.INVESTIGATOR)) {
+      return 'Enquêteur';  
+    } else {
+      return 'Participant';
+    }
+  }
 
   // Check if the user has the specified role
   hasRole(role: string): boolean {
-    return this.authService.hasRole(role);
+    return this.authService.hasRole(role as UserRole);
   }
 }

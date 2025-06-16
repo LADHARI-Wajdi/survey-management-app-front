@@ -1,1 +1,43 @@
-<p>pie-chart works!</p>
+<!-- features/analytics/components/chart-components/pie-chart/pie-chart.component.html -->
+<div class="pie-chart-container" [ngClass]="{'loading': isLoading}">
+    <div class="chart-header" *ngIf="title">
+      <h3 class="chart-title">{{ title }}</h3>
+      <div class="chart-actions" *ngIf="showActions">
+        <button class="btn-icon" (click)="refresh()" title="Actualiser">
+          <i class="fa fa-sync-alt"></i>
+        </button>
+        <button class="btn-icon" (click)="downloadChart()" title="Télécharger">
+          <i class="fa fa-download"></i>
+        </button>
+      </div>
+    </div>
+  
+    <div class="chart-content">
+      <div class="spinner-container" *ngIf="isLoading">
+        <div class="spinner"></div>
+      </div>
+      
+      <div class="no-data-message" *ngIf="!isLoading && (!data || data.labels?.length === 0)">
+        <i class="fa fa-chart-pie"></i>
+        <p>Aucune donnée disponible</p>
+      </div>
+      
+      <canvas #pieCanvas [hidden]="isLoading || !data || data.labels?.length === 0"></canvas>
+    </div>
+    
+    <div class="chart-legend" *ngIf="showLegend && chartInstance && !isLoading && displayCustomLegend">
+      <div class="legend-item" *ngFor="let label of chartInstance.data.labels; let i = index">
+        <span class="legend-color" 
+              [style.background-color]="getColorForIndex(i)"></span>
+        <span class="legend-label">{{ label }}</span>
+        <span class="legend-value" *ngIf="showValues">
+          {{ getValueForIndex(i) }}
+          <span class="percentage" *ngIf="showPercentages">({{ getPercentageForIndex(i) }}%)</span>
+        </span>
+      </div>
+    </div>
+  
+    <div class="chart-footer" *ngIf="footnote">
+      <p class="footnote">{{ footnote }}</p>
+    </div>
+  </div>

@@ -1,36 +1,123 @@
+// admin/components/user-management/services/user-management.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-
-
-import { UserProfileModel } from '../models/user-profile.model';
-import { environment } from '../../../../../environements/environment';
+import { User } from '../../../../core/models/user.model';
+import { environements } from '../../../../../environements/environement';
+import { map } from 'rxjs/operators';
+import { UserRole } from '../../../../core/models/user.model'; // Adjust the import path as necessary
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class UserManagementService {
-  private apiUrl = `${environment.apiUrl}/users`;
+  private apiUrl = `${environements.apiUrl}/users`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
-  getAllUsers(): Observable<UserProfileModel[]> {
-    return this.http.get<UserProfileModel[]>(this.apiUrl);
+  /**
+   * Get all users
+   */
+  getAllUsers(): Observable<User[]> {
+    const token = localStorage.getItem('auth_token');
+    const headers = { Authorization: `Bearer ${token}` };
+
+    return this.http.get<any[]>(this.apiUrl, { headers }).pipe(
+      map(users =>
+        users.map(user => ({
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          createdAt: new Date(user.createdAt),
+          updatedAt: new Date(user.updatedAt),
+          roles: [user.role.toLowerCase()] as UserRole[],
+          // Optional fields if needed:
+          firstName: user.firstName ?? '',
+          lastName: user.lastName ?? '',
+          profilePicture: user.profilePicture ?? '',
+        }))
+      )
+    );
   }
 
-  getUserById(id: string): Observable<UserProfileModel> {
-    return this.http.get<UserProfileModel>(`${this.apiUrl}/${id}`);
+  /**
+   * Get user by ID
+   */
+  getUserById(id: string): Observable<User> {
+    const token = localStorage.getItem('auth_token');
+    const headers = { Authorization: `Bearer ${token}` };
+    return this.http.get<User>(`${this.apiUrl}/${id}`, { headers });
   }
 
-  createUser(user: UserProfileModel): Observable<UserProfileModel> {
-    return this.http.post<UserProfileModel>(this.apiUrl, user);
+  /**
+   * Create a new user
+   */
+  createUser(user: Partial<User>): Observable<User> {
+    const token = localStorage.getItem('auth_token');
+    const headers = { Authorization: `Bearer ${token}` };
+    return this.http.post<User>(this.apiUrl, user, { headers });
   }
 
-  updateUser(id: string, user: UserProfileModel): Observable<UserProfileModel> {
-    return this.http.put<UserProfileModel>(`${this.apiUrl}/${id}`, user);
+  /**
+   * Update an existing user
+   */
+  updateUser(id: string, userData: Partial<User>): Observable<User> {
+    const token = localStorage.getItem('auth_token');
+    const headers = { Authorization: `Bearer ${token}` };
+    return this.http.put<User>(`${this.apiUrl}/${id}`, userData, { headers });
   }
 
-  deleteUser(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  /**
+   * Delete a user
+   */
+  deleteUser(id: string): Observable<any> {
+    const token = localStorage.getItem('auth_token');
+    const headers = { Authorization: `Bearer ${token}` };
+    return this.http.delete(`${this.apiUrl}/${id}`, { headers });
+  }
+
+  /**
+   * Change user role
+   */
+  changeUserRole(id: string, roles: string[]): Observable<User> {
+    const token = localStorage.getItem('auth_token');
+    const headers = { Authorization: `Bearer ${token}` };
+    return this.http.patch<User>(`${this.apiUrl}/${id}/roles`, { roles }, { headers });
+  }
+
+  /**
+   * Get user statistics
+   */
+  getUserStats(): Observable<any> {
+    const token = localStorage.getItem('auth_token');
+    const headers = { Authorization: `Bearer ${token}` };
+    return this.http.get<any>(`${this.apiUrl}/stats`, { headers });
+  }
+
+  /**
+   * Get users by role
+   */
+  getUsersByRole(role: string): Observable<User[]> {
+    const token = localStorage.getItem('auth_token');
+    const headers = { Authorization: `Bearer ${token}` };
+    return this.http.get<User[]>(`${this.apiUrl}/role/${role}`, { headers });
+  }
+
+  /**
+   * Search users
+   */
+  searchUsers(query: string): Observable<User[]> {
+    const token = localStorage.getItem('auth_token');
+    const headers = { Authorization: `Bearer ${token}` };
+    return this.http.get<User[]>(`${this.apiUrl}/search?q=${encodeURIComponent(query)}`, { headers });
+  }
+
+  /**
+   * Get user activity
+   */
+  getUserActivity(id: string): Observable<any[]> {
+    const token = localStorage.getItem('auth_token');
+    const headers = { Authorization: `Bearer ${token}` };
+    return this.http.get<any[]>(`${this.apiUrl}/${id}/activity`, { headers });
   }
 }

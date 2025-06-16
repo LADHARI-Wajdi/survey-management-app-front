@@ -1,6 +1,6 @@
 <div class="survey-create">
   <h1 class="page-title">Création d'une nouvelle enquête</h1>
-
+F
   <!-- Barre d'étapes -->
   <div class="steps-container">
     <div class="steps-bar">
@@ -91,9 +91,12 @@
         <div class="form-group">
           <label for="type">Type d'enquête</label>
           <select id="type" formControlName="type" class="form-control">
-            <option value="survey">Sondage standard</option>
-            <option value="poll">Vote rapide</option>
-            <option value="quiz">Quiz</option>
+            <option [value]="SurveyType.GENERAL">Enquête générale</option>
+            <option [value]="SurveyType.ACADEMIC">Enquête académique</option>
+            <option [value]="SurveyType.CUSTOMER">Enquête client</option>
+            <option [value]="SurveyType.EMPLOYEE">Enquête employé</option>
+            <option [value]="SurveyType.MARKET_RESEARCH">Étude de marché</option>
+            <option [value]="SurveyType.TEMPLATE">Modèle</option>
           </select>
         </div>
       </form>
@@ -387,6 +390,7 @@
       *ngIf="currentStep < 5"
       (click)="nextStep()"
     >
+    
       Suivant
     </button>
     <button

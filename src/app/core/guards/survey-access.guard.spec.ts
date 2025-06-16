@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { CanActivateFn } from '@angular/router';
 
-import { surveyAccessGuard } from './survey-access.guard';
+import { SurveyAccessGuard } from './survey-access.guard';
 
 describe('surveyAccessGuard', () => {
   const executeGuard: CanActivateFn = (...guardParameters) => 

@@ -1,1 +1,94 @@
-<p>survey-detail works!</p>
+<!-- features/survey-management/components/survey-detail/survey-detail.component.html -->
+<div class="survey-detail" *ngIf="survey && !isLoading">
+  <div class="survey-header">
+    <h1>{{ survey.title }}</h1>
+    <div class="survey-meta">
+      <span class="status-badge" [ngClass]="survey.status">
+        {{ survey.status | titlecase }}
+      </span>
+      <span class="creation-date">
+        Créé le {{ survey.creationDate | date:'dd/MM/yyyy' }}
+      </span>
+    </div>
+  </div>
+
+  <div class="survey-description" *ngIf="survey.description">
+    {{ survey.description }}
+  </div>
+
+  <!-- Survey Sections -->
+  <div class="survey-sections">
+    <div class="section" *ngFor="let section of survey.sections">
+      <h2 class="section-title">{{ section.title }}</h2>
+      <div class="section-description" *ngIf="section.description">
+        {{ section.description }}
+      </div>
+
+      <!-- Questions -->
+      <div class="questions-list">
+        <div class="question-item" *ngFor="let question of getSectionQuestions(section)">
+          <div class="question-header">
+            <h4 class="question-title">{{ question.title }}</h4>
+            <span class="question-badge" [ngClass]="'type-' + question.type">
+              {{ question.type | questionTypeLabel }}
+            </span>
+          </div>
+
+          <div class="question-description" *ngIf="question.description">
+            {{ question.description }}
+          </div>
+
+          <!-- Question Details -->
+          <div class="question-details" [ngSwitch]="question.type">
+            <!-- Choice Questions -->
+            <div class="options-list" *ngSwitchCase="'single_choice'">
+              <div class="option-item" *ngFor="let option of question.options">
+                <mat-radio-button [value]="option.value" disabled>
+                  {{ option.text }}
+                </mat-radio-button>
+              </div>
+            </div>
+
+            <div class="options-list" *ngSwitchCase="'multiple_choice'">
+              <div class="option-item" *ngFor="let option of question.options">
+                <mat-checkbox [checked]="false" disabled>
+                  {{ option.text }}
+                </mat-checkbox>
+              </div>
+            </div>
+
+            <!-- Other Question Types -->
+            <div class="question-type-preview" *ngSwitchDefault>
+              <mat-form-field appearance="outline" class="preview-field">
+                <mat-label>Réponse</mat-label>
+                <input matInput [placeholder]="'Type de réponse: ' + (question.type | questionTypeLabel)" disabled>
+              </mat-form-field>
+            </div>
+          </div>
+
+          <!-- Question Footer -->
+          <div class="question-footer">
+            <span class="question-required" *ngIf="question.isRequired">
+              Question obligatoire
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Loading State -->
+<div class="loading-state" *ngIf="isLoading">
+  <mat-spinner></mat-spinner>
+  <p>Chargement de l'enquête...</p>
+</div>
+
+<!-- Error State -->
+<div class="error-state" *ngIf="error">
+  <mat-icon class="error-icon">error_outline</mat-icon>
+  <p>{{ error }}</p>
+  <button mat-raised-button color="primary" (click)="loadSurvey(survey?.id || '')">
+    Réessayer
+  </button>
+</div>

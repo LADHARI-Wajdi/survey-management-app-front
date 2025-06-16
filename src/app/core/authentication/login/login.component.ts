@@ -1,21 +1,27 @@
-// core/authentication/login/login.component.ts
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  ReactiveFormsModule,
+} from '@angular/forms';
+import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { AuthService } from '../services/auth.service';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, RouterModule],
 })
 export class LoginComponent implements OnInit {
-  loginform: FormGroup = new FormGroup({});
+  loginForm!: FormGroup;
   loading = false;
   submitted = false;
-  returnUrl: string | undefined;
+  returnUrl: string = '/';
   error = '';
-  loginForm: any;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -23,15 +29,15 @@ export class LoginComponent implements OnInit {
     private router: Router,
     private authService: AuthService
   ) {
-    // redirect to home if already logged in
+    // redirect to appropriate dashboard if already logged in
     if (this.authService.currentUserValue) {
-      this.router.navigate(['/']);
+      this.authService.redirectByRole();
     }
   }
 
   ngOnInit() {
-    this.loginform = this.formBuilder.group({
-      email: ['', [Validators.required, Validators.email]],
+    this.loginForm = this.formBuilder.group({
+      username: ['', [Validators.required]],
       password: ['', Validators.required],
       rememberMe: [false],
     });
@@ -56,24 +62,30 @@ export class LoginComponent implements OnInit {
     this.loading = true;
     this.authService
       .login({
-        email: this.f.email.value,
-        password: this.f.password.value,
+        username: this.f['username'].value,
+        password: this.f['password'].value,
       })
-      .subscribe(
-        (data) => {
+      .subscribe({
+        next: (data) => {
           // If remember me is checked, store user info
-          if (this.f.rememberMe.value) {
-            localStorage.setItem('rememberUser', this.f.email.value);
+          if (this.f['rememberMe'].value) {
+            console.log(
+              'Token in localStorage:',
+              localStorage.getItem('auth_token')
+            );
+            localStorage.setItem('rememberUser', this.f['username'].value);
           } else {
             localStorage.removeItem('rememberUser');
           }
-          this.router.navigate([this.returnUrl]);
+
+          // Rediriger l'utilisateur en fonction de son rôle - UNIQUEMENT APRÈS LOGIN!
+          this.authService.redirectByRole(this.returnUrl);
         },
-        (error) => {
-          this.error = error.error?.message || 'Invalid credentials';
+        error: (error) => {
+          this.error = error.error?.message || 'Identifiants invalides';
           this.loading = false;
-        }
-      );
+        },
+      });
   }
 
   forgotPassword() {

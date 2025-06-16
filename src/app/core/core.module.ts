@@ -22,9 +22,6 @@ import { AuthService } from './authentication/services/auth.service';
 import { TokenService } from './authentication/services/token.service';
 
 // Interceptors
-import { AuthInterceptor } from './interceptors/auth.interceptor';
-import { ErrorInterceptor } from './interceptors/error.interceptor';
-import { LoaderInterceptor } from './interceptors/loader.interceptor';
 import { AuthenticationModule } from './authentication/authentication.module';
 @NgModule({
   imports: [
@@ -45,13 +42,11 @@ import { AuthenticationModule } from './authentication/authentication.module';
     AuthService,
     TokenService,
 
-    // Guards
     AuthGuard,
     RoleGuard,
     SurveyAccessGuard,
   ],
   exports: [
-    // Modules that should be available everywhere
     CommonModule,
     HttpClientModule,
     FormsModule,

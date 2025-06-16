@@ -1,1 +1,176 @@
-<p>question-edit works!</p>
+<div class="question-edit-container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>
+        {{ questionId ? 'Modifier la question' : 'Créer une nouvelle question' }}
+      </mat-card-title>
+      <mat-card-subtitle>
+        Configurez tous les paramètres de votre question
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <div *ngIf="isLoading" class="loading-spinner">
+     
+    </div>
+
+    <mat-card-content *ngIf="!isLoading">
+      <form [formGroup]="questionForm" (ngSubmit)="onSubmit()">
+        <!-- Basic Information -->
+        <div class="form-section">
+          <h3>Informations de base</h3>
+          
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Titre de la question</mat-label>
+            <input matInput formControlName="title" placeholder="Saisissez votre question">
+            <mat-error *ngIf="questionForm.get('title')?.hasError('required')">
+              Le titre est obligatoire
+            </mat-error>
+            <mat-error *ngIf="questionForm.get('title')?.hasError('minlength')">
+              Le titre doit contenir au moins 3 caractères
+            </mat-error>
+          </mat-form-field>
+          
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Description (optionnelle)</mat-label>
+            <textarea matInput formControlName="description" rows="3" 
+              placeholder="Fournissez des instructions ou clarifications supplémentaires"></textarea>
+          </mat-form-field>
+          
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="flex-1">
+              <mat-label>Type de question</mat-label>
+              <mat-select formControlName="type">
+                <mat-option *ngFor="let type of questionTypes" [value]="type">
+                  {{ getTypeLabel(type) }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            
+            <div class="required-toggle">
+              <mat-checkbox formControlName="isRequired">
+                Question obligatoire
+              </mat-checkbox>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Options for Single/Multiple Choice Questions -->
+        <div class="form-section" *ngIf="questionForm.get('type')?.value === 'single_choice' || 
+                                         questionForm.get('type')?.value === 'multiple_choice'">
+          <h3>Options de réponse</h3>
+          
+          <div formArrayName="options" class="options-list">
+            <div *ngFor="let option of optionsArray.controls; let i = index" 
+                [formGroupName]="i" class="option-item">
+              <mat-form-field appearance="outline" class="flex-1">
+                <mat-label>Texte de l'option</mat-label>
+                <input matInput formControlName="text" placeholder="Texte affiché">
+                <mat-error *ngIf="option.get('text')?.hasError('required')">
+                  Le texte de l'option est obligatoire
+                </mat-error>
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline" class="option-value">
+                <mat-label>Valeur</mat-label>
+                <input matInput formControlName="value" placeholder="Valeur interne">
+              </mat-form-field>
+              
+              <div class="option-other">
+                <mat-checkbox formControlName="isOther">
+                  "Autre"
+                </mat-checkbox>
+              </div>
+              
+              <button type="button" mat-icon-button color="warn" (click)="removeOption(i)" 
+                     [disabled]="optionsArray.length <= 1"
+                     matTooltip="Supprimer cette option">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+            
+            <button type="button" mat-stroked-button color="primary" (click)="addOption()"
+                   class="add-option-btn">
+              <mat-icon>add</mat-icon> Ajouter une option
+            </button>
+          </div>
+        </div>
+        
+        <!-- Settings Based on Question Type -->
+        <div class="form-section" formGroupName="settings">
+          <h3>Paramètres avancés</h3>
+          
+          <!-- Text Question Settings -->
+          <div *ngIf="questionForm.get('type')?.value === 'text_short' || 
+                     questionForm.get('type')?.value === 'text_long'">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Texte d'exemple (placeholder)</mat-label>
+              <input matInput formControlName="placeholder" placeholder="Ex: Votre réponse ici...">
+            </mat-form-field>
+          </div>
+          
+          <!-- Numeric Question Settings -->
+          <div *ngIf="questionForm.get('type')?.value === 'numeric'" class="form-row">
+            <mat-form-field appearance="outline" class="flex-1">
+              <mat-label>Valeur minimale</mat-label>
+              <input matInput type="number" formControlName="minValue">
+              <mat-error *ngIf="questionForm.get('settings.minValue')?.hasError('required')">
+                La valeur minimale est obligatoire
+              </mat-error>
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline" class="flex-1">
+              <mat-label>Valeur maximale</mat-label>
+              <input matInput type="number" formControlName="maxValue">
+              <mat-error *ngIf="questionForm.get('settings.maxValue')?.hasError('required')">
+                La valeur maximale est obligatoire
+              </mat-error>
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline" class="flex-1">
+              <mat-label>Pas</mat-label>
+              <input matInput type="number" formControlName="step">
+            </mat-form-field>
+          </div>
+          
+          <!-- File Upload Settings -->
+          <div *ngIf="questionForm.get('type')?.value === 'file'">
+            <div class="form-row">
+              <mat-checkbox formControlName="allowMultipleFiles">
+                Autoriser plusieurs fichiers
+              </mat-checkbox>
+            </div>
+            
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="flex-1">
+                <mat-label>Taille maximale de fichier (MB)</mat-label>
+                <input matInput type="number" formControlName="maxFileSize">
+                <mat-error *ngIf="questionForm.get('settings.maxFileSize')?.hasError('required')">
+                  La taille maximale est obligatoire
+                </mat-error>
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline" class="flex-1">
+                <mat-label>Types de fichiers acceptés</mat-label>
+                <input matInput formControlName="acceptedFileTypes" placeholder="Ex: .pdf,.jpg,.png">
+                <mat-hint>Séparez les extensions par des virgules</mat-hint>
+                <mat-error *ngIf="questionForm.get('settings.acceptedFileTypes')?.hasError('required')">
+                  Les types de fichiers sont obligatoires
+                </mat-error>
+              </mat-form-field>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <button type="button" mat-stroked-button (click)="cancel()">
+            Annuler
+          </button>
+          <button type="submit" mat-raised-button color="primary" [disabled]="isLoading">
+            {{ questionId ? 'Mettre à jour' : 'Créer' }}
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

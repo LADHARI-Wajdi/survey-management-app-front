@@ -1,1 +1,38 @@
-<p>bar-chart works!</p>
+<!-- features/analytics/components/chart-components/bar-chart/bar-chart.component.html -->
+<div class="bar-chart-container" [ngClass]="{'loading': isLoading}">
+  <div class="chart-header" *ngIf="title">
+    <h3 class="chart-title">{{ title }}</h3>
+    <div class="chart-actions" *ngIf="showActions">
+      <button class="btn-icon" (click)="refresh()" title="Actualiser">
+        <i class="fa fa-sync-alt"></i>
+      </button>
+      <button class="btn-icon" (click)="downloadChart()" title="Télécharger">
+        <i class="fa fa-download"></i>
+      </button>
+    </div>
+  </div>
+
+  <div class="chart-content">
+    <div class="spinner-container" *ngIf="isLoading">
+      <div class="spinner"></div>
+    </div>
+    
+    <div class="no-data-message" *ngIf="!isLoading && (!data?.datasets || data?.datasets?.length === 0)">
+      <i class="fa fa-chart-bar"></i>
+      <p>Aucune donnée disponible</p>
+    </div>
+    
+    <canvas #barCanvas [hidden]="isLoading || !this['data']?.datasets || this['data']?.datasets?.length === 0"></canvas>
+  </div>
+  
+  <div class="chart-legend" *ngIf="showLegend && chartInstance && !isLoading">
+    <div class="legend-item" *ngFor="let dataset of chartInstance.data.datasets; let i = index">
+      <span class="legend-color" [style.background-color]="dataset.backgroundColor"></span>
+      <span class="legend-label">{{ dataset.label || 'Série ' + (i + 1) }}</span>
+    </div>
+  </div>
+
+  <div class="chart-footer" *ngIf="footnote">
+    <p class="footnote">{{ ['footnote'] }}</p>
+  </div>
+</div>

@@ -1,0 +1,79 @@
+<div class="question-modal">
+  <h2 mat-dialog-title>{{ data ? 'Modifier la question' : 'Nouvelle question' }}</h2>
+
+  <form [formGroup]="questionForm" (ngSubmit)="onSubmit()">
+    <mat-dialog-content>
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Titre de la question</mat-label>
+          <input matInput formControlName="title" placeholder="Entrez le titre de la question" required>
+          <mat-error *ngIf="questionForm.get('title')?.hasError('required')">
+            Le titre est obligatoire
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Description (optionnelle)</mat-label>
+          <textarea matInput formControlName="description" rows="2" 
+                    placeholder="Ajoutez une description à votre question"></textarea>
+        </mat-form-field>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Type de question</mat-label>
+          <mat-select formControlName="type" required>
+            <mat-option *ngFor="let type of questionTypes" [value]="type">
+              {{ type | questionTypeLabel }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-checkbox formControlName="isRequired" class="required-checkbox">
+          Question obligatoire
+        </mat-checkbox>
+      </div>
+
+      <!-- Options for choice questions -->
+      <div class="options-section" *ngIf="showOptions" [formGroup]="optionsForm">
+        <h3>Options de réponse</h3>
+        
+        <div formArrayName="options">
+          <div *ngFor="let option of options.controls; let i = index" [formGroupName]="i" class="option-row">
+            <mat-form-field appearance="outline" class="option-input">
+              <mat-label>Option {{ i + 1 }}</mat-label>
+              <input matInput formControlName="text" placeholder="Texte de l'option" required>
+              <mat-error *ngIf="option.get('text')?.hasError('required')">
+                Le texte de l'option est obligatoire
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="value-input">
+              <mat-label>Valeur (optionnelle)</mat-label>
+              <input matInput formControlName="value" placeholder="Valeur de l'option">
+            </mat-form-field>
+
+            <button type="button" mat-icon-button color="warn" (click)="removeOption(i)" 
+                    [disabled]="options.length <= 1">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+
+        <button type="button" mat-stroked-button color="primary" (click)="addOption()" class="add-option-btn">
+          <mat-icon>add</mat-icon>
+          Ajouter une option
+        </button>
+      </div>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+      <button type="button" mat-button (click)="onCancel()">Annuler</button>
+      <button type="submit" mat-raised-button color="primary" [disabled]="questionForm.invalid">
+        {{ data ? 'Modifier' : 'Ajouter' }}
+      </button>
+    </mat-dialog-actions>
+  </form>
+</div> 

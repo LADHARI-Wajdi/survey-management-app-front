@@ -1,4 +1,6 @@
 // core/models/survey.model.ts
+import { Question } from './question.model';
+
 export enum SurveyStatus {
   DRAFT = 'draft',
   PUBLISHED = 'published',
@@ -6,12 +8,16 @@ export enum SurveyStatus {
 }
 
 export enum SurveyType {
-  SURVEY = 'survey',
-  POLL = 'poll',
-  QUIZ = 'quiz',
+  GENERAL = 'GENERAL',
+  ACADEMIC = 'ACADEMIC',
+  CUSTOMER = 'CUSTOMER',
+  EMPLOYEE = 'EMPLOYEE',
+  MARKET_RESEARCH = 'MARKET_RESEARCH',
+  TEMPLATE = 'TEMPLATE'
 }
 
 export interface Survey {
+[x: string]: any;
   id: string;
   title: string;
   description?: string;
@@ -29,7 +35,7 @@ export interface SurveySection {
   title: string;
   description?: string;
   order: number;
-  questions: string[]; // IDs of questions
+  questions: Question[];
 }
 
 export interface SurveySettings {

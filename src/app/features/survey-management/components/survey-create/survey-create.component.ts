@@ -1,16 +1,24 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
+import { CommonModule } from '@angular/common';
 
 import { SurveyService } from '../../services/survey.service';
 import { NotificationService } from '../../../../core/services/notification.service';
-import { Question } from '../../../../core/models/question.model';
-import { Survey, SurveyStatus } from '../../../../core/models/survey.model';
+import { Question, QuestionType } from '../../../../core/models/question.model';
+import { Survey, SurveyStatus, SurveyType } from '../../../../core/models/survey.model';
+import { QuestionCreateModalComponent } from '../question-create-modal/question-create-modal.component';
 
 @Component({
   selector: 'app-survey-create',
   templateUrl: './survey-create.component.html',
   styleUrls: ['./survey-create.component.scss'],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+  ],
 })
 export class SurveyCreateComponent implements OnInit {
   currentStep = 1;
@@ -18,17 +26,21 @@ export class SurveyCreateComponent implements OnInit {
   surveySettingsForm: FormGroup;
   questions: Question[] = [];
   publishOption = 'now';
+  isLoading = false;
+  SurveyType = SurveyType;
+  surveyTypes = Object.values(SurveyType);
 
   constructor(
     private fb: FormBuilder,
     private surveyService: SurveyService,
     private notificationService: NotificationService,
-    private router: Router
+    private router: Router,
+    private dialog: MatDialog
   ) {
     this.surveyInfoForm = this.fb.group({
       title: ['', Validators.required],
       description: [''],
-      type: ['survey'],
+      type: [SurveyType.GENERAL, Validators.required],
     });
 
     this.surveySettingsForm = this.fb.group({
@@ -70,37 +82,61 @@ export class SurveyCreateComponent implements OnInit {
   }
 
   addQuestion(): void {
-    // Dans une application réelle, cette méthode ouvrirait un modal de création de question
-    // Pour l'exemple, ajoutons une question fictive
-    const newQuestion: Question = {
-      id: `q${this.questions.length + 1}`,
-      title: `Question ${this.questions.length + 1}`,
-      description: 'Description de la question',
-      type: 'single_choice',
-      isRequired: true,
-      order: this.questions.length + 1,
-      options: [
-        { id: 'opt1', text: 'Option 1', value: 'opt1' },
-        { id: 'opt2', text: 'Option 2', value: 'opt2' },
-        { id: 'opt3', text: 'Option 3', value: 'opt3' },
-      ],
-    };
+    const dialogRef = this.dialog.open(QuestionCreateModalComponent, {
+      width: '600px',
+      data: {
+        order: this.questions.length + 1
+      }
+    });
 
-    this.questions.push(newQuestion);
-    this.notificationService.success('Question ajoutée avec succès');
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.questions.push({
+          ...result,
+          id: `temp-${Date.now()}`, // Temporary ID until survey is saved
+          order: this.questions.length + 1
+        });
+        this.notificationService.success('Question ajoutée avec succès');
+      }
+    });
   }
 
   editQuestion(question: Question): void {
-    // Cette méthode ouvrirait normalement un modal d'édition de question
-    console.log('Édition de la question:', question);
-    // Dans une application réelle, on ouvrirait un modal d'édition
-    this.notificationService.info(
-      "Fonction d'édition de question à implémenter"
-    );
+    const dialogRef = this.dialog.open(QuestionCreateModalComponent, {
+      width: '600px',
+      data: {
+        id: question.id,
+        title: question.title,
+        description: question.description,
+        type: question.type,
+        isRequired: question.isRequired,
+        order: question.order,
+        options: question.options
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        const index = this.questions.findIndex(q => q.id === question.id);
+        if (index !== -1) {
+          this.questions[index] = {
+            ...result,
+            id: question.id,
+            order: question.order
+          };
+          this.notificationService.success('Question modifiée avec succès');
+        }
+      }
+    });
   }
 
   deleteQuestion(question: Question): void {
-    this.questions = this.questions.filter((q) => q.id !== question.id);
+    this.questions = this.questions.filter(q => q.id !== question.id);
+    // Reorder remaining questions
+    this.questions = this.questions.map((q, index) => ({
+      ...q,
+      order: index + 1
+    }));
     this.notificationService.success('Question supprimée avec succès');
   }
 
@@ -121,22 +157,32 @@ export class SurveyCreateComponent implements OnInit {
     );
   }
 
-  publishSurvey(): void {
+  async publishSurvey(): Promise<void> {
+    if (this.surveyInfoForm.invalid) {
+      this.surveyInfoForm.markAllAsTouched();
+      this.notificationService.error('Veuillez remplir tous les champs obligatoires');
+      return;
+    }
+
+    if (this.questions.length === 0) {
+      this.notificationService.error('Veuillez ajouter au moins une question');
+      return;
+    }
+
+    this.isLoading = true;
     const survey = this.prepareSurveyData();
     survey.status = SurveyStatus.PUBLISHED;
 
-    this.surveyService.createSurvey(survey).subscribe(
-      (result) => {
-        this.notificationService.success('Enquête publiée avec succès');
-        this.router.navigate(['/surveys']);
-      },
-      (error) => {
-        this.notificationService.error(
-          "Erreur lors de la publication de l'enquête"
-        );
-        console.error(error);
-      }
-    );
+    try {
+      const result = await this.surveyService.createSurvey(survey).toPromise();
+      this.notificationService.success('Enquête publiée avec succès');
+      this.router.navigate(['/surveys']);
+    } catch (error) {
+      this.notificationService.error("Erreur lors de la publication de l'enquête");
+      console.error(error);
+    } finally {
+      this.isLoading = false;
+    }
   }
 
   getQuestionTypeLabel(type: string): string {
@@ -153,16 +199,14 @@ export class SurveyCreateComponent implements OnInit {
     return types[type] || type;
   }
 
-  private prepareSurveyData(): Survey {
+  private prepareSurveyData(): Partial<Survey> {
     const settings = this.surveySettingsForm.value;
 
     return {
-      id: '', // Sera généré par le backend
       title: this.surveyInfoForm.value.title,
       description: this.surveyInfoForm.value.description,
       type: this.surveyInfoForm.value.type,
       status: SurveyStatus.DRAFT,
-      createdBy: '', // Sera défini par le backend
       creationDate: new Date(),
       sections: [
         {
@@ -170,8 +214,30 @@ export class SurveyCreateComponent implements OnInit {
           title: 'Section principale',
           description: '',
           order: 1,
-          questions: this.questions.map((q) => q.id),
-        },
+          questions: this.questions.map(q => ({
+            id: q.id,
+            title: q.title,
+            description: q.description,
+            type: q.type,
+            isRequired: q.isRequired,
+            order: q.order,
+            options: q.options?.map(opt => ({
+              id: opt.id || `opt_${Date.now()}`,
+              text: opt.text,
+              value: opt.value,
+              imageUrl: opt.imageUrl,
+              isOther: opt.isOther
+            })),
+            settings: q.settings,
+            conditionalLogic: q.conditionalLogic,
+            validations: q.validations,
+            value: q.value,
+            survey: q.survey,
+            skipped: q.skipped,
+            maxRating: q.maxRating,
+            minRating: q.minRating
+          }))
+        }
       ],
       settings: {
         allowAnonymous: settings.allowAnonymous,
@@ -181,7 +247,7 @@ export class SurveyCreateComponent implements OnInit {
         responseLimit: settings.responseLimit,
         notifyOnResponse: settings.notifyOnResponse,
         thankYouMessage: settings.thankYouMessage,
-      },
+      }
     };
   }
 }

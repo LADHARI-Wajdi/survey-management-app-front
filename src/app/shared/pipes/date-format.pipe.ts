@@ -4,9 +4,14 @@ import { DatePipe } from '@angular/common';
 
 @Pipe({
   name: 'dateFormat',
+  standalone: true
 })
 export class DateFormatPipe implements PipeTransform {
-  constructor(private datePipe: DatePipe) {}
+  private datePipe: DatePipe;
+
+  constructor() {
+    this.datePipe = new DatePipe('fr-FR');
+  }
 
   transform(
     value: Date | string | number,

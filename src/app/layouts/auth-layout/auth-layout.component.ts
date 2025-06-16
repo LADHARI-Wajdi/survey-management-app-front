@@ -1,12 +1,15 @@
 // layouts/auth-layout/auth-layout.component.ts
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
+import { CommonModule } from '@angular/common';
 import { AuthService } from '../../core/authentication/services/auth.service';
 
 @Component({
   selector: 'app-auth-layout',
   templateUrl: './auth-layout.component.html',
   styleUrls: ['./auth-layout.component.scss'],
+  standalone: true,
+  imports: [CommonModule, RouterModule],
 })
 export class AuthLayoutComponent implements OnInit {
   currentYear = new Date().getFullYear();
