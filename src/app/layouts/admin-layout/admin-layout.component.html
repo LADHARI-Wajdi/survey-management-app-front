@@ -9,81 +9,45 @@
       </div>
     </div>
 
-    <div class="sidebar-content">
-      <nav class="main-nav">
-        <ul>
-          <li>
-            <a
-              routerLink="/admin/dashboard"
-              [ngClass]="{
-                active:
-                  activeRoute === '/admin/dashboard' || activeRoute === '/admin'
-              }"
-            >
-              <i class="fa fa-tachometer-alt"></i>
-              <span *ngIf="!isMenuCollapsed">Tableau de bord</span>
-            </a>
-          </li>
-          <li>
-            <a
-              routerLink="/admin/users"
-              [ngClass]="{ active: activeRoute.includes('/admin/users') }"
-            >
-              <i class="fa fa-users"></i>
-              <span *ngIf="!isMenuCollapsed">Utilisateurs</span>
-            </a>
-          </li>
-          <li>
-            <a
-              routerLink="/surveys"
-              [ngClass]="{ active: activeRoute.includes('/surveys') }"
-            >
-              <i class="fa fa-list-alt"></i>
-              <span *ngIf="!isMenuCollapsed">Enquêtes</span>
-            </a>
-          </li>
-          <li>
-            <a
-              routerLink="/analytics"
-              [ngClass]="{ active: activeRoute.includes('/analytics') }"
-            >
-              <i class="fa fa-chart-pie"></i>
-              <span *ngIf="!isMenuCollapsed">Statistiques globales</span>
-            </a>
-          </li>
-          <!-- Nouvel élément pour la distribution -->
-          <li>
-            <a
-              routerLink="/distribution"
-              [ngClass]="{ active: activeRoute.includes('/distribution') }"
-            >
-              <i class="fa fa-share-alt"></i>
-              <span *ngIf="!isMenuCollapsed">Distribution</span>
-            </a>
-          </li>
-          <li>
-            <a
-              routerLink="/admin/settings"
-              [ngClass]="{ active: activeRoute.includes('/settings') }"
-            >
-              <i class="fa fa-cog"></i>
-              <span *ngIf="!isMenuCollapsed">Paramètres</span>
-            </a>
-          </li>
-        </ul>
+     <div class="sidebar-content">
+    <nav class="main-nav">
+      <ul>
+        <li>
+          <a routerLink="/admin/dashboard" [ngClass]="{active: activeRoute === '/admin/dashboard' || activeRoute === '/admin'}">
+            <i class="fa fa-columns"></i>
+            <span *ngIf="!isMenuCollapsed">Tableau de bord</span>
+          </a>
+        </li>
+        <li>
+          <a routerLink="/admin/users" [ngClass]="{active: activeRoute.includes('/admin/users')}">
+            <i class="fa fa-users"></i>
+            <span *ngIf="!isMenuCollapsed">Utilisateurs</span>
+          </a>
+        </li>
+        <li>
+          <a routerLink="/surveys" [ngClass]="{active: activeRoute.includes('/surveys')}">
+            <i class="fa fa-list-alt"></i>
+            <span *ngIf="!isMenuCollapsed">Enquêtes</span>
+          </a>
+        </li>
 
-        <div class="nav-section" *ngIf="!isMenuCollapsed">Application</div>
+        <li>
+          <a routerLink="/distribution" [ngClass]="{active: activeRoute.includes('/distribution')}">
+            <i class="fa fa-share-alt"></i>
+            <span *ngIf="!isMenuCollapsed">Distribution</span>
+          </a>
+        </li>
+                <li>
+          <a routerLink="/analytics" [ngClass]="{active: activeRoute.includes('/analytics')}">
+            <i class="fa fa-tachometer"></i>
+            <span *ngIf="!isMenuCollapsed">Statistiques globales</span>
+          </a>
+        </li>
 
-        <ul>
-          <li>
-            <a routerLink="/" target="_blank">
-              <i class="fa fa-external-link-alt"></i>
-              <span *ngIf="!isMenuCollapsed">Accéder à l'application</span>
-            </a>
-          </li>
-        </ul>
-      </nav>
-    </div>
+      </ul>
+
+    </nav>
+  </div>
 
     <div class="sidebar-footer">
       <div class="user-menu" *ngIf="currentUser">

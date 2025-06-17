@@ -5,7 +5,7 @@ import { delay } from 'rxjs/operators';
 import { Survey, SurveyStatus, SurveyType } from '../models/survey.model';
 import { User } from '../models/user.model';
 import { Question, QuestionType } from '../models/question.model';
-
+import { mockSurveys } from '../mock/survey.mock';
 
 @Injectable({
   providedIn: 'root'
@@ -59,128 +59,18 @@ export class ApiService {
       }
     ];
 
-    this.questions = [
-      {
-        id: 'q1',
-        title: 'Comment évaluez-vous la qualité de notre service client ?',
-        type: QuestionType.RATING,
-        isRequired: true,
-        order: 1,
-        options: [],
-        value: null,
-        skipped: false,
-        maxRating: 0,
-        minRating: 0
-      },
-      {
-        id: 'q2',
-        title: 'Quelle fonctionnalité aimeriez-vous voir ajoutée à notre produit ?',
-        type: QuestionType.TEXT_LONG,
-        isRequired: false,
-        order: 2,
-        options: [],
-        value: null,
-        skipped: false,
-        maxRating: 0,
-        minRating: 0
-      },
-      {
-        id: 'q3',
-        title: 'Comment avez-vous découvert notre produit ?',
-        type: QuestionType.SINGLE_CHOICE,
-        isRequired: true,
-        order: 3,
-        options: [
-          { id: 'opt1', text: 'Réseaux sociaux', value: 'social_media' },
-          { id: 'opt2', text: 'Moteur de recherche', value: 'search_engine' },
-          { id: 'opt3', text: 'Recommandation', value: 'referral' },
-          { id: 'opt4', text: 'Publicité', value: 'advertisement' },
-        ],
-        value: null,
-        skipped: false,
-        maxRating: 0,
-        minRating: 0
-      }
-    ];
+    // Utiliser les enquêtes mockées
+    this.surveys = mockSurveys;
 
-    // Enquêtes
-    this.surveys = [
-      {
-        id: 's1',
-        title: 'Satisfaction Client 2023',
-        description: 'Évaluation de la satisfaction des clients pour nos services en 2023',
-        status: SurveyStatus.PUBLISHED,
-        type: SurveyType.SURVEY,
-        createdBy: 'user1',
-        creationDate: new Date('2023-02-15'),
-        sections: [
-          {
-            id: 'sec1',
-            title: 'Satisfaction générale',
-            order: 1,
-            questions: ['q1', 'q2', 'q3']
-          }
-        ],
-        settings: {
-          allowAnonymous: true,
-          showProgressBar: true,
-          allowIncomplete: false,
-          shuffleQuestions: false,
-          notifyOnResponse: true,
-          thankYouMessage: 'Merci pour votre participation à cette enquête!'
+    // Extraire toutes les questions des enquêtes
+    this.questions = this.surveys.reduce((acc: Question[], survey) => {
+      survey.sections.forEach(section => {
+        if (Array.isArray(section.questions)) {
+          acc.push(...section.questions);
         }
-      },
-      {
-        id: 's2',
-        title: 'Évaluation des formations',
-        description: 'Évaluation des sessions de formation dispensées aux employés',
-        status: SurveyStatus.PUBLISHED,
-        type: SurveyType.SURVEY,
-        createdBy: 'user2',
-        creationDate: new Date('2023-03-01'),
-        sections: [
-          {
-            id: 'sec2',
-            title: 'Qualité des formations',
-            order: 1,
-            questions: ['q1', 'q2']
-          }
-        ],
-        settings: {
-          allowAnonymous: false,
-          showProgressBar: true,
-          allowIncomplete: true,
-          shuffleQuestions: false,
-          notifyOnResponse: true,
-          thankYouMessage: 'Merci pour votre évaluation!'
-        }
-      },
-      {
-        id: 's3',
-        title: 'Feedback produit',
-        description: 'Recueillir des commentaires sur notre nouveau produit',
-        status: SurveyStatus.DRAFT,
-        type: SurveyType.POLL,
-        createdBy: 'user1',
-        creationDate: new Date('2023-03-10'),
-        sections: [
-          {
-            id: 'sec3',
-            title: 'Feedback',
-            order: 1,
-            questions: ['q3']
-          }
-        ],
-        settings: {
-          allowAnonymous: true,
-          showProgressBar: false,
-          allowIncomplete: false,
-          shuffleQuestions: false,
-          notifyOnResponse: false,
-          thankYouMessage: 'Merci pour votre feedback!'
-        }
-      }
-    ];
+      });
+      return acc;
+    }, []);
 
     // Réponses simulées
     this.responses = [
@@ -188,34 +78,45 @@ export class ApiService {
         id: 'r1',
         surveyId: 's1',
         respondentId: 'user3',
-        startTime: new Date('2023-02-20T10:15:00'),
-        endTime: new Date('2023-02-20T10:20:00'),
+        startTime: new Date('2024-02-20T10:15:00'),
+        endTime: new Date('2024-02-20T10:20:00'),
         completionStatus: 'complete',
         answers: [
           {
             questionId: 'q1',
             value: 4,
             skipped: false,
-            timestamp: new Date('2023-02-20T10:16:00')
+            timestamp: new Date('2024-02-20T10:16:00')
           },
           {
             questionId: 'q2',
-            value: 'Une meilleure intégration avec les applications mobiles serait appréciée.',
+            value: ['opt1', 'opt3'],
             skipped: false,
-            timestamp: new Date('2023-02-20T10:18:00')
-          },
+            timestamp: new Date('2024-02-20T10:17:00')
+          }
+        ]
+      },
+      {
+        id: 'r2',
+        surveyId: 's2',
+        respondentId: 'user3',
+        startTime: new Date('2024-02-21T14:30:00'),
+        endTime: new Date('2024-02-21T14:35:00'),
+        completionStatus: 'complete',
+        answers: [
           {
             questionId: 'q3',
-            value: 'referral',
+            value: 8,
             skipped: false,
-            timestamp: new Date('2023-02-20T10:19:00')
+            timestamp: new Date('2024-02-21T14:31:00')
+          },
+          {
+            questionId: 'q4',
+            value: 'J\'ai appris à mieux gérer mon temps et à prioriser mes tâches.',
+            skipped: false,
+            timestamp: new Date('2024-02-21T14:32:00')
           }
-        ],
-        metadata: {
-          device: 'desktop',
-          browser: 'Chrome',
-          timeSpent: 300
-        }
+        ]
       }
     ];
   }

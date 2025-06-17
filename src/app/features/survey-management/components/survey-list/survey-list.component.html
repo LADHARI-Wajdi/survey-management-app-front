@@ -91,13 +91,7 @@
             matTooltip="Distribuer">
             <i class="fa fa-share-alt"></i>
           </button>
-          <button 
-            class="btn btn-icon btn-success" 
-            [routerLink]="['/analytics/survey', survey.id]"
-            *ngIf="survey['responseCount'] > 0"
-            matTooltip="Analyser">
-            <i class="fa fa-chart-line"></i>
-          </button>
+
           <button 
             class="btn btn-icon btn-danger"
             (click)="deleteSurvey(survey)"
