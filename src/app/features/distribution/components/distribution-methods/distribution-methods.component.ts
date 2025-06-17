@@ -425,8 +425,8 @@ export class DistributionMethodsComponent implements OnInit {
     this.distributionService
       .generateSurveyLink(this.surveyId, this.expirationDate)
       .subscribe(
-        (link) => {
-          this.surveyLink = link;
+        (link: any) => {
+          this.surveyLink = link && link.publicLink ? link.publicLink : (typeof link === 'string' ? link : '');
         },
         (error) => {
           this.notificationService.error(

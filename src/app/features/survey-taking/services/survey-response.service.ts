@@ -1,11 +1,12 @@
 // src/app/features/survey-taking/services/participant.service.ts
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, of, throwError, BehaviorSubject } from 'rxjs';
 import { catchError, map, tap, switchMap } from 'rxjs/operators';
 import { LoggerService } from '../../../core/services/logger.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { AuthService } from '../../../core/authentication/services/auth.service';
+import { TokenService } from '../../../core/authentication/services/token.service';
 import { SurveyParticipant, ParticipantStatus, ParticipantResponse, SurveyDraft, ParticipantProgress } from '../models/participant.model';
 
 @Injectable({
@@ -30,13 +31,22 @@ export class ParticipantService {
     private http: HttpClient,
     private logger: LoggerService,
     private notificationService: NotificationService,
-    private authService: AuthService
+    private authService: AuthService,
+    private tokenService: TokenService
   ) {
     // Vérifier si le navigateur supporte le stockage local
     this.offlineMode = this.checkOfflineSupport();
     
     // Restaurer les données en cours si elles existent
     this.restoreCurrentParticipant();
+  }
+
+  /**
+   * Get HTTP headers with auth token
+   */
+  private getHeaders(): HttpHeaders {
+    const token = this.tokenService.getToken();
+    return new HttpHeaders().set('Authorization', `Bearer ${token}`);
   }
 
   /**
@@ -107,7 +117,7 @@ export class ParticipantService {
       anonymous: isAnonymous
     };
     
-    return this.http.post<SurveyParticipant>(`${this.apiUrl}/start`, payload).pipe(
+    return this.http.post<SurveyParticipant>(`${this.apiUrl}/start`, payload, { headers: this.getHeaders() }).pipe(
       tap(participant => {
         // Sauvegarder les données du participant
         this.currentParticipantSubject.next(participant);
@@ -149,7 +159,7 @@ export class ParticipantService {
    * @param participantId ID du participant
    */
   getParticipant(participantId: string): Observable<SurveyParticipant> {
-    return this.http.get<SurveyParticipant>(`${this.apiUrl}/${participantId}`).pipe(
+    return this.http.get<SurveyParticipant>(`${this.apiUrl}/${participantId}`, { headers: this.getHeaders() }).pipe(
       catchError(error => {
         this.logger.error('Erreur lors de la récupération du participant', { error, participantId });
         return throwError(() => error);
@@ -162,7 +172,7 @@ export class ParticipantService {
    * @param participantId ID du participant
    */
   getParticipantProgress(participantId: string): Observable<ParticipantProgress> {
-    return this.http.get<ParticipantProgress>(`${this.apiUrl}/${participantId}/progress`).pipe(
+    return this.http.get<ParticipantProgress>(`${this.apiUrl}/${participantId}/progress`, { headers: this.getHeaders() }).pipe(
       tap(progress => {
         this.participantProgressSubject.next(progress);
         
@@ -187,7 +197,7 @@ export class ParticipantService {
       this.saveResponseLocally(response);
     }
     
-    return this.http.post<ParticipantResponse>(`${this.apiUrl}/responses`, response).pipe(
+    return this.http.post<ParticipantResponse>(`${this.apiUrl}/responses`, response, { headers: this.getHeaders() }).pipe(
       tap(savedResponse => {
         // Mettre à jour le progrès
         this.updateProgressAfterResponse(response.questionId);
@@ -318,7 +328,7 @@ export class ParticipantService {
    * @param participantId ID du participant
    */
   completeSurvey(participantId: string): Observable<SurveyParticipant> {
-    return this.http.put<SurveyParticipant>(`${this.apiUrl}/${participantId}/complete`, {}).pipe(
+    return this.http.put<SurveyParticipant>(`${this.apiUrl}/${participantId}/complete`, {}, { headers: this.getHeaders() }).pipe(
       tap(participant => {
         this.currentParticipantSubject.next(participant);
         
@@ -470,7 +480,7 @@ export class ParticipantService {
    * @param participantId ID du participant
    */
   getParticipantResponses(participantId: string): Observable<ParticipantResponse[]> {
-    return this.http.get<ParticipantResponse[]>(`${this.apiUrl}/${participantId}/responses`).pipe(
+    return this.http.get<ParticipantResponse[]>(`${this.apiUrl}/${participantId}/responses`, { headers: this.getHeaders() }).pipe(
       catchError(error => {
         this.logger.error('Erreur lors de la récupération des réponses', { error, participantId });
         return throwError(() => error);
@@ -484,7 +494,7 @@ export class ParticipantService {
    * @param token Token d'invitation
    */
   validateInvitationToken(surveyId: string, token: string): Observable<boolean> {
-    return this.http.post<any>(`${this.apiUrl}/validate-token`, { surveyId, token }).pipe(
+    return this.http.post<any>(`${this.apiUrl}/validate-token`, { surveyId, token }, { headers: this.getHeaders() }).pipe(
       map(response => true),
       catchError(error => {
         if (error.status === 404 || error.status === 403) {

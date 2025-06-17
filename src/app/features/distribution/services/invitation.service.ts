@@ -1,7 +1,7 @@
 // features/distribution/services/invitation.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { 
   Invitation, 
@@ -11,6 +11,7 @@ import {
   InvitationStatus 
 } from '../models/invitation.model';
 import { environements } from '../../../../environements/environement';
+import { TokenService } from '../../../core/authentication/services/token.service';
 
 @Injectable({
   providedIn: 'root',
@@ -18,7 +19,10 @@ import { environements } from '../../../../environements/environement';
 export class InvitationService {
   private apiUrl = `${environements.apiUrl}/invitations`;
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private tokenService: TokenService
+  ) {}
 
   /**
    * Récupère les invitations pour une enquête
@@ -26,7 +30,16 @@ export class InvitationService {
    * @returns Liste des invitations
    */
   getInvitations(surveyId: string): Observable<Invitation[]> {
-    return this.http.get<Invitation[]>(`${this.apiUrl}/surveys/${surveyId}`).pipe(
+    const token = this.tokenService.getToken();
+    if (!token) {
+      return throwError(() => new Error('No authentication token found'));
+    }
+
+    return this.http.get<Invitation[]>(`${this.apiUrl}/surveys/${surveyId}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    }).pipe(
       catchError((error) => {
         console.error('Error getting invitations', error);
         // Pour la démonstration, on retourne un tableau vide
@@ -63,7 +76,16 @@ export class InvitationService {
    * @returns Détails de l'invitation
    */
   getInvitationById(invitationId: string): Observable<Invitation> {
-    return this.http.get<Invitation>(`${this.apiUrl}/${invitationId}`).pipe(
+    const token = this.tokenService.getToken();
+    if (!token) {
+      return throwError(() => new Error('No authentication token found'));
+    }
+
+    return this.http.get<Invitation>(`${this.apiUrl}/${invitationId}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    }).pipe(
       catchError((error) => {
         console.error('Error getting invitation details', error);
         // Pour la démonstration, on retourne une invitation fictive
@@ -195,8 +217,17 @@ export class InvitationService {
    * @returns Statistiques des invitations
    */
   getInvitationStatistics(surveyId: string): Observable<InvitationStatistics> {
+    const token = this.tokenService.getToken();
+    if (!token) {
+      return throwError(() => new Error('No authentication token found'));
+    }
+
     return this.http
-      .get<InvitationStatistics>(`${this.apiUrl}/surveys/${surveyId}/statistics`)
+      .get<InvitationStatistics>(`${this.apiUrl}/surveys/${surveyId}/statistics`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
       .pipe(
         catchError((error) => {
           console.error('Error getting invitation statistics', error);
@@ -264,7 +295,16 @@ export class InvitationService {
    * @returns Historique des envois
    */
   getInvitationHistory(surveyId: string): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/surveys/${surveyId}/history`).pipe(
+    const token = this.tokenService.getToken();
+    if (!token) {
+      return throwError(() => new Error('No authentication token found'));
+    }
+
+    return this.http.get<any[]>(`${this.apiUrl}/surveys/${surveyId}/history`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    }).pipe(
       catchError((error) => {
         console.error('Error getting invitation history', error);
         // Pour la démonstration, on retourne un historique fictif

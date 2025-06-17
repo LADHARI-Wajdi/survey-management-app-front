@@ -1,0 +1,142 @@
+.qr-code-container {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+
+  .qr-code-box {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    width: 100%;
+    max-width: 400px;
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    .loading-spinner {
+      text-align: center;
+      
+      .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #3498db;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 16px;
+      }
+
+      p {
+        color: #666;
+        margin: 0;
+      }
+    }
+
+    .error-message {
+      text-align: center;
+      color: #dc3545;
+      
+      i {
+        font-size: 48px;
+        margin-bottom: 16px;
+      }
+
+      p {
+        margin-bottom: 16px;
+      }
+
+      .retry-button {
+        background: #dc3545;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+
+        &:hover {
+          background: #c82333;
+        }
+      }
+    }
+
+    .qr-code-content {
+      text-align: center;
+
+      .qr-code-image {
+        max-width: 250px;
+        height: auto;
+        margin-bottom: 16px;
+      }
+
+      .qr-code-info {
+        margin-bottom: 16px;
+        
+        p {
+          margin: 4px 0;
+          color: #666;
+          font-size: 14px;
+        }
+      }
+
+      .download-button {
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        margin: 0 auto;
+        transition: background-color 0.3s;
+
+        i {
+          margin-right: 8px;
+        }
+
+        &:hover {
+          background: #0056b3;
+        }
+      }
+    }
+
+    .no-qr-code {
+      text-align: center;
+      color: #666;
+
+      i {
+        font-size: 64px;
+        margin-bottom: 16px;
+        color: #ccc;
+      }
+
+      p {
+        margin-bottom: 16px;
+      }
+
+      .generate-button {
+        background: #28a745;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+
+        &:hover {
+          background: #218838;
+        }
+      }
+    }
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+

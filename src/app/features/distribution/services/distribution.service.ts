@@ -1,9 +1,11 @@
 // features/distribution/services/distribution.service.ts
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
-import { catchError, delay } from 'rxjs/operators';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Observable, of, throwError } from 'rxjs';
+import { catchError, delay, map } from 'rxjs/operators';
 import { environements } from '../../../../environements/environement';
+import { QrCode } from '../models/distribution.model';
+import { TokenService } from '../../../core/authentication/services/token.service';
 
 @Injectable({
   providedIn: 'root'
@@ -11,23 +13,37 @@ import { environements } from '../../../../environements/environement';
 export class DistributionService {
   private apiUrl = `${environements.apiUrl}/distribution`;
 
-  constructor(private http: HttpClient) { }
+  constructor(
+    private http: HttpClient,
+    private tokenService: TokenService
+  ) {}
 
   /**
    * Generate QR code for a distribution
    * @param distributionId ID of the distribution
    * @returns Observable of the QR code data
    */
-  generateQrCode(distributionId: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/${distributionId}/qrcode`, {}, {
+  generateQrCode(distributionId: string): Observable<QrCode> {
+    const token = this.tokenService.getToken();
+    if (!token) {
+      return throwError(() => new Error('No authentication token found'));
+    }
+
+    return this.http.post<QrCode>(`${this.apiUrl}/${distributionId}/qrcode`, {}, {
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
+        'Authorization': `Bearer ${token}`
       }
     }).pipe(
-      catchError((error) => {
-        console.error('Error generating QR code', error);
-        throw error;
-      })
+      map(response => {
+        // Ensure the response matches the QrCode interface
+        return {
+          ...response,
+          createdAt: new Date(response.createdAt),
+          expiresAt: response.expiresAt ? new Date(response.expiresAt) : undefined,
+          lastScannedAt: response.lastScannedAt ? new Date(response.lastScannedAt) : undefined
+        };
+      }),
+      catchError(this.handleError)
     );
   }
 
@@ -37,9 +53,10 @@ export class DistributionService {
    * @returns Observable of the distribution data
    */
   getDistribution(distributionId: string): Observable<any> {
+    const token = this.tokenService.getToken();
     return this.http.get(`${this.apiUrl}/${distributionId}`, {
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
+        'Authorization': `Bearer ${token}`
       }
     }).pipe(
       catchError((error) => {
@@ -50,9 +67,9 @@ export class DistributionService {
   }
 
   /**
-   * Get QR code image URL
+   * Get the URL for a QR code image
    * @param distributionId ID of the distribution
-   * @returns URL of the QR code image
+   * @returns URL for the QR code image
    */
   getQrCodeImageUrl(distributionId: string): string {
     return `${environements.apiUrl}/uploads/qrcodes/${distributionId}.png`;
@@ -64,12 +81,13 @@ export class DistributionService {
    * @returns Observable of the created distribution
    */
   createDistributionWithQR(surveyId: string): Observable<any> {
+    const token = this.tokenService.getToken();
     return this.http.post(`${this.apiUrl}`, {
       surveyId: surveyId,
       method: 'QR_CODE'
     }, {
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
+        'Authorization': `Bearer ${token}`
       }
     }).pipe(
       catchError((error) => {
@@ -86,9 +104,19 @@ export class DistributionService {
    * @returns Lien de l'enquête
    */
   generateSurveyLink(surveyId: string, expirationDate: string | null = null): Observable<string> {
+    const token = this.tokenService.getToken();
+    if (!token) {
+      return throwError(() => new Error('No authentication token found'));
+    }
+
     return this.http.post<string>(`${this.apiUrl}/link`, { 
-      surveyId, 
-      expirationDate 
+      surveyId,
+      method: 'LINK',
+      scheduledDate: expirationDate
+    }, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
     }).pipe(
       catchError((error) => {
         console.error('Error generating survey link', error);
@@ -137,7 +165,15 @@ export class DistributionService {
    * @returns Statistiques de distribution
    */
   getDistributionStats(surveyId: string): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/stats/${surveyId}`).pipe(
+    const token = this.tokenService.getToken();
+    if (!token) {
+      return throwError(() => new Error('No authentication token found'));
+    }
+    return this.http.get<any>(`${this.apiUrl}/stats/${surveyId}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    }).pipe(
       catchError((error) => {
         console.error('Error getting distribution stats', error);
         // Mock distribution stats pour démonstration
@@ -173,6 +209,26 @@ export class DistributionService {
    */
   private getMockQrCodeDataUrl(surveyId: string): string {
     // Ceci est un data URL basique simulant un QR code pour la démonstration
-    return 'data:image/png;base64,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';
+    return 'data:image/png;base64,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';
+  }
+
+  /**
+   * Handle HTTP errors
+   * @param error The HTTP error response
+   * @returns Observable of the error
+   */
+  private handleError(error: HttpErrorResponse) {
+    let errorMessage = 'An error occurred while generating the QR code';
+    
+    if (error.error instanceof ErrorEvent) {
+      // Client-side error
+      errorMessage = error.error.message;
+    } else {
+      // Server-side error
+      errorMessage = error.error?.message || errorMessage;
+    }
+    
+    console.error('QR Code Generation Error:', error);
+    return throwError(() => new Error(errorMessage));
   }
 }
