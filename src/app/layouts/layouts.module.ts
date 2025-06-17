@@ -6,6 +6,7 @@ import { SharedModule } from '../shared/shared.module';
 import { MainLayoutComponent } from './main-layout/main-layout.component';
 import { AdminLayoutComponent } from './admin-layout/admin-layout.component';
 import { AuthLayoutComponent } from './auth-layout/auth-layout.component';
+import { InvestigatorLayoutComponent } from './investigator-layout/investigator-layout.component';
 
 @NgModule({
 
@@ -16,6 +17,7 @@ import { AuthLayoutComponent } from './auth-layout/auth-layout.component';
     MainLayoutComponent,
     AdminLayoutComponent, 
     AuthLayoutComponent,
+    InvestigatorLayoutComponent,
     
   ],
 

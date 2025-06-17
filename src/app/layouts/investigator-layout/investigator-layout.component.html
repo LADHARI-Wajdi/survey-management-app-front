@@ -1,51 +1,44 @@
-<!-- layouts/admin-layout/admin-layout.component.html -->
-<div class="admin-layout" [ngClass]="{ 'menu-collapsed': isMenuCollapsed }">
-  <!-- Admin Sidebar navigation -->
+<!-- layouts/investigator-layout/investigator-layout.component.html -->
+<div class="investigator-layout" [ngClass]="{ 'menu-collapsed': isMenuCollapsed }">
+  <!-- Investigator Sidebar navigation -->
   <aside class="sidebar">
     <div class="sidebar-header">
       <div class="logo">
         <img src="assets/images/logo.png" alt="Logo" />
-        <span *ngIf="!isMenuCollapsed">SurveyApp Admin</span>
+        <span *ngIf="!isMenuCollapsed">SurveyApp Investigator</span>
       </div>
     </div>
 
-     <div class="sidebar-content">
-    <nav class="main-nav">
-      <ul>
-        <li>
-          <a routerLink="/admin/dashboard" [ngClass]="{active: activeRoute === '/admin/dashboard' || activeRoute === '/admin'}">
-            <i class="fa fa-columns"></i>
-            <span *ngIf="!isMenuCollapsed">Tableau de bord</span>
-          </a>
-        </li>
-        <li>
-          <a routerLink="/admin/users" [ngClass]="{active: activeRoute.includes('/admin/users')}">
-            <i class="fa fa-users"></i>
-            <span *ngIf="!isMenuCollapsed">Utilisateurs</span>
-          </a>
-        </li>
-        <li>
-          <a routerLink="/admin/surveys" [ngClass]="{active: activeRoute.includes('/admin/surveys')}">
-            <i class="fa fa-list-alt"></i>
-            <span *ngIf="!isMenuCollapsed">Enquêtes</span>
-          </a>
-        </li>
-
-        <li>
-          <a routerLink="/admin/distribution" [ngClass]="{active: activeRoute.includes('/admin/distribution')}">
-            <i class="fa fa-share-alt"></i>
-            <span *ngIf="!isMenuCollapsed">Distribution</span>
-          </a>
-        </li>
-        <li>
-          <a routerLink="/admin/analytics" [ngClass]="{active: activeRoute.includes('/admin/analytics')}">
-            <i class="fa fa-tachometer"></i>
-            <span *ngIf="!isMenuCollapsed">Statistiques globales</span>
-          </a>
-        </li>
-      </ul>
-    </nav>
-  </div>
+    <div class="sidebar-content">
+      <nav class="main-nav">
+        <ul>
+          <li>
+            <a routerLink="/investigator/dashboard" [ngClass]="{active: activeRoute === '/investigator/dashboard' || activeRoute === '/investigator'}">
+              <i class="fa fa-columns"></i>
+              <span *ngIf="!isMenuCollapsed">Tableau de bord</span>
+            </a>
+          </li>
+          <li>
+            <a routerLink="/investigator/surveys" [ngClass]="{active: activeRoute.includes('/investigator/surveys')}">
+              <i class="fa fa-list-alt"></i>
+              <span *ngIf="!isMenuCollapsed">Enquêtes</span>
+            </a>
+          </li>
+          <li>
+            <a routerLink="/investigator/distribution" [ngClass]="{active: activeRoute.includes('/investigator/distribution')}">
+              <i class="fa fa-share-alt"></i>
+              <span *ngIf="!isMenuCollapsed">Distribution</span>
+            </a>
+          </li>
+          <li>
+            <a routerLink="/investigator/analytics" [ngClass]="{active: activeRoute.includes('/investigator/analytics')}">
+              <i class="fa fa-tachometer"></i>
+              <span *ngIf="!isMenuCollapsed">Statistiques</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
 
     <div class="sidebar-footer">
       <div class="user-menu" *ngIf="currentUser">
@@ -61,7 +54,7 @@
         </div>
         <div class="user-details" *ngIf="!isMenuCollapsed">
           <span class="user-name">{{ currentUser.firstName }} {{ currentUser.lastName }}</span>
-          <span class="user-role">Administrateur</span>
+          <span class="user-role">Enquêteur</span>
         </div>
       </div>
       <div class="footer-actions" *ngIf="!isMenuCollapsed">
@@ -118,8 +111,8 @@
     <!-- Footer -->
     <footer class="footer">
       <div class="footer-content">
-        <p>&copy; {{ currentYear }} SurveyApp Admin - Tous droits réservés</p>
+        <p>&copy; {{ currentYear }} SurveyApp - Tous droits réservés</p>
       </div>
     </footer>
   </div>
-</div>
+</div> 

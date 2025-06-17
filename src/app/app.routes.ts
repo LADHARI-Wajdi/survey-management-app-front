@@ -3,6 +3,7 @@ import { Routes } from '@angular/router';
 import { MainLayoutComponent } from './layouts/main-layout/main-layout.component';
 import { AuthLayoutComponent } from './layouts/auth-layout/auth-layout.component';
 import { AdminLayoutComponent } from './layouts/admin-layout/admin-layout.component';
+import { InvestigatorLayoutComponent } from './layouts/investigator-layout/investigator-layout.component';
 
 import { LoginComponent } from './core/authentication/login/login.component';
 import { RegisterComponent } from './core/authentication/register/register.component';
@@ -23,7 +24,6 @@ import { NotFoundComponent } from './shared/components/not-found/not-found.compo
 
 export const AppRoutingModule: Routes = [
   { 
-     
     path: '',
     component: MainLayoutComponent,
     canActivate: [authGuard],
@@ -38,32 +38,10 @@ export const AppRoutingModule: Routes = [
         loadChildren: () => import('./features/dashboards/model/dashboard.module').then(m => m.DashboardModule),
       },
       {
-        path: 'surveys',
-        loadChildren: () => import('./features/survey-management/survey-management.module').then(
-          (m) => m.SurveyManagementModule
-        ),
-      },
-      {
         path: 'question-bank',
         loadChildren: () => import('./features/question-bank/question-bank.module').then(
           (m) => m.QuestionBankModule
         ),
-      },
-      {
-        path: 'analytics',
-        loadChildren: () => import('./features/analytics/analytics.module').then(
-          (m) => m.AnalyticsModule
-        ),
-        canActivate: [roleGuard],
-        data: { roles: ['admin', 'investigator'] }
-      },
-      {
-        path: 'distribution',
-        loadChildren: () => import('./features/distribution/distribution.module').then(
-          (m) => m.DistributionModule
-        ),
-        canActivate: [roleGuard],
-        data: { roles: ['admin', 'investigator'] }
       },
     ]
   },
@@ -114,13 +92,34 @@ export const AppRoutingModule: Routes = [
         loadChildren: () =>
           import('./admin/components/user-management/user-management.module').then((m) => m.UserManagementModule),
       },
+      {
+        path: 'surveys',
+        loadChildren: () => import('./features/survey-management/survey-management.module').then(
+          (m) => m.SurveyManagementModule
+        ),
+        data: { title: 'Gestion des enquêtes' }
+      },
+      {
+        path: 'distribution',
+        loadChildren: () => import('./features/distribution/distribution.module').then(
+          (m) => m.DistributionModule
+        ),
+        data: { title: 'Distribution' }
+      },
+      {
+        path: 'analytics',
+        loadChildren: () => import('./features/analytics/analytics.module').then(
+          (m) => m.AnalyticsModule
+        ),
+        data: { title: 'Statistiques globales' }
+      },
     ],
   },
   {
     path: 'investigator',
-    component: InvestigatorDashboardComponent,
+    component: InvestigatorLayoutComponent,
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['admin','investigator'] },
+    data: { roles: ['admin', 'investigator'] },
     children: [
       {
         path: '',
@@ -131,6 +130,27 @@ export const AppRoutingModule: Routes = [
         path: 'dashboard',
         loadChildren: () => 
           import('./features/dashboards/model/investigator-dashboard.module').then(m => m.InvestigatorDashboardModule),
+      },
+      {
+        path: 'surveys',
+        loadChildren: () => import('./features/survey-management/survey-management.module').then(
+          (m) => m.SurveyManagementModule
+        ),
+        data: { title: 'Mes enquêtes' }
+      },
+      {
+        path: 'distribution',
+        loadChildren: () => import('./features/distribution/distribution.module').then(
+          (m) => m.DistributionModule
+        ),
+        data: { title: 'Distribution' }
+      },
+      {
+        path: 'analytics',
+        loadChildren: () => import('./features/analytics/analytics.module').then(
+          (m) => m.AnalyticsModule
+        ),
+        data: { title: 'Statistiques' }
       },
     ],
   },

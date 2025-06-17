@@ -186,7 +186,6 @@ export class InvestigatorDashboardComponent implements OnInit {
 
   createNewSurvey(): void {
     console.log('Créer une nouvelle enquête');
-    // Dans une application réelle, on redirigerait vers la page de création
-    this.router.navigate(['/surveys/create']);
+    this.router.navigate(['/investigator/surveys/create']);
   }
 }
